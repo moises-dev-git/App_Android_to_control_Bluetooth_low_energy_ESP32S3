@@ -1,0 +1,36 @@
+R_DEF: Internal format may change without notice
+local
+dimen fab_margin
+id btnCancel
+id btnChrome
+id btnCopy
+id btnEnableBluetooth
+id btnLClick
+id btnManageMacros
+id btnPaste
+id btnRClick
+id btnRunMacro
+id btnSaveMacro
+id btnSendText
+id btnShortcutAltTab
+id btnShortcutCtrlF
+id btnShortcutCtrlTab
+id btnShortcutDelay
+id btnShortcutEnter
+id btnShortcutEsc
+id btnShortcutTab
+id btnShortcutText
+id devicesListView
+id etMacroContent
+id etMacroName
+id etText
+id fab
+id lvMacros
+id spinnerMacros
+id tvStatus
+layout activity_control
+layout activity_macro
+layout activity_main
+string app_name
+style Base.Theme.ESP32App
+style Theme.ESP32App

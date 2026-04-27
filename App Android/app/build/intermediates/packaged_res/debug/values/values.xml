@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <string name="app_name">ESP32 App</string>
+    <style name="Base.Theme.ESP32App" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        
+    </style>
+    <style name="Theme.ESP32App" parent="Base.Theme.ESP32App"/>
+</resources>

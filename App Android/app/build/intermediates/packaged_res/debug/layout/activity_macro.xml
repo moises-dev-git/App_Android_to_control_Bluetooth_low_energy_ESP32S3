@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Gerenciar Macros"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etMacroName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nome do Macro (Ex: Buscar Link)"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Inserir Atalhos (Um por linha):"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="3"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:alignmentMode="alignMargins"
+        android:columnOrderPreserved="false">
+
+        <Button android:id="@+id/btnShortcutTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall" />
+        <Button android:id="@+id/btnShortcutEnter" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Enter" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+        <Button android:id="@+id/btnShortcutCtrlF" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Ctrl+F" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+        
+        <Button android:id="@+id/btnShortcutEsc" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Esc" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+        <Button android:id="@+id/btnShortcutAltTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Alt+Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+        <Button android:id="@+id/btnShortcutCtrlTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Ctrl+Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+        <Button android:id="@+id/btnShortcutText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Text:" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+        <Button android:id="@+id/btnShortcutDelay" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Delay:500" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+    </GridLayout>
+
+    <EditText
+        android:id="@+id/etMacroContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|start"
+        android:hint="Exemplo:\nCTRL_F\nDELAY:500\nTEXT:meu link\nENTER"
+        android:inputType="textMultiLine"
+        android:lines="6"
+        android:scrollHorizontally="false"
+        android:background="#f4f4f4"
+        android:padding="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:layout_marginRight="4dp"/>
+
+        <Button
+            android:id="@+id/btnSaveMacro"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#28a745"
+            android:textColor="#FFFFFF"
+            android:text="Salvar Macro"
+            android:layout_marginLeft="4dp"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ccc"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"/>
+        
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Macros Salvos (clique para editar, segure para excluir):"
+        android:textSize="14sp"/>
+
+    <ListView
+        android:id="@+id/lvMacros"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>
