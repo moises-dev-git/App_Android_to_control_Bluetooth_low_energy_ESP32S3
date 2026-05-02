@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/moises/.gradle/daemon/8.4/com.example.esp32app-mergeDebugResources-3:/layout/activity_main.xml",
+        "source": "/home/moises/.gradle/daemon/8.4/com.example.esp32app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.esp32app-mergeDebugResources-3:/layout/activity_control.xml",
+        "source": "com.example.esp32app-main-6:/layout/activity_control.xml"
+    }
+]

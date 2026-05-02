@@ -85,7 +85,16 @@ class MyCallbacks: public BLECharacteristicCallbacks {
                 keyboard.write(KEY_RETURN);
               } else if (cmd == "TAB") {
                 keyboard.write(KEY_TAB);
-              } else if (cmd == "ESC") {
+              }
+              
+              else if (cmd == "CTRL_F4") {
+                keyboard.press(KEY_LEFT_CTRL);
+                keyboard.press(KEY_F4);
+                delay(100);
+                keyboard.releaseAll();
+              }
+              
+               else if (cmd == "ESC") {
                 keyboard.write(KEY_ESC);
               } else if (cmd == "ALT_TAB") {
                 keyboard.press(KEY_LEFT_ALT);
@@ -104,6 +113,24 @@ class MyCallbacks: public BLECharacteristicCallbacks {
                 int d = cmd.substring(6).toInt();
                 if (d > 0 && d <= 10000) delay(d);
               }
+
+                else if (cmd == "MOUSE_CLICK" || cmd == "MOUSE_LCLICK") {
+                Mouse.click(MOUSE_LEFT);
+              } else if (cmd == "MOUSE_RCLICK") {
+                Mouse.click(MOUSE_RIGHT);
+              }
+
+              else if (cmd.startsWith("MOUSE:")) {
+              // Format: CMD:MOUSE:dx,dy
+              int commaIndex = cmd.indexOf(',', 6);
+              if (commaIndex != -1) {
+              int dx = cmd.substring(6, commaIndex).toInt();
+              int dy = cmd.substring(commaIndex + 1).toInt();
+              Mouse.move(dx, dy);
+            }
+          }
+
+
               delay(50);
             }
             startIndex = endIndex + 1;
@@ -121,7 +148,10 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
 void setup() {
   Serial.begin(115200);
-  
+
+  //Essas duas linhas são apenas para que o PC com WINDOWS 'esqueça' o nome anterior do device:
+  //USB.VID(0x045E); // Simula Microsoft (opcional)
+  //USB.PID(0x007D); // Simula um mouse/teclado genérico
 
   USB.productName("Teclado/Mouse HID");
   USB.manufacturerName("Espressif");

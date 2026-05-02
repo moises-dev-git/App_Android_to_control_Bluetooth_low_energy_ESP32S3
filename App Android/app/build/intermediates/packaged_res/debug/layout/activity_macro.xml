@@ -46,6 +46,16 @@
         <Button android:id="@+id/btnShortcutText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Text:" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
         <Button android:id="@+id/btnShortcutDelay" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Delay:500" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
 
+        <Button android:id="@+id/btnShortcutCtrlF4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="CTRL_F4" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+        <Button android:id="@+id/btnShortcutMouseLClick" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE_LCLICK" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+        <Button android:id="@+id/btnShortcutMouseRClick" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE_RCLICK" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+        <Button android:id="@+id/btnShortcutMouseXY" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE:XY" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
+
+
+
     </GridLayout>
 
     <EditText

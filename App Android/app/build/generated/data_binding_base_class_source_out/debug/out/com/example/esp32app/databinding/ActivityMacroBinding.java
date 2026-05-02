@@ -34,6 +34,9 @@ public final class ActivityMacroBinding implements ViewBinding {
   public final Button btnShortcutCtrlF;
 
   @NonNull
+  public final Button btnShortcutCtrlF4;
+
+  @NonNull
   public final Button btnShortcutCtrlTab;
 
   @NonNull
@@ -44,6 +47,15 @@ public final class ActivityMacroBinding implements ViewBinding {
 
   @NonNull
   public final Button btnShortcutEsc;
+
+  @NonNull
+  public final Button btnShortcutMouseLClick;
+
+  @NonNull
+  public final Button btnShortcutMouseRClick;
+
+  @NonNull
+  public final Button btnShortcutMouseXY;
 
   @NonNull
   public final Button btnShortcutTab;
@@ -62,9 +74,11 @@ public final class ActivityMacroBinding implements ViewBinding {
 
   private ActivityMacroBinding(@NonNull LinearLayout rootView, @NonNull Button btnCancel,
       @NonNull Button btnSaveMacro, @NonNull Button btnShortcutAltTab,
-      @NonNull Button btnShortcutCtrlF, @NonNull Button btnShortcutCtrlTab,
-      @NonNull Button btnShortcutDelay, @NonNull Button btnShortcutEnter,
-      @NonNull Button btnShortcutEsc, @NonNull Button btnShortcutTab,
+      @NonNull Button btnShortcutCtrlF, @NonNull Button btnShortcutCtrlF4,
+      @NonNull Button btnShortcutCtrlTab, @NonNull Button btnShortcutDelay,
+      @NonNull Button btnShortcutEnter, @NonNull Button btnShortcutEsc,
+      @NonNull Button btnShortcutMouseLClick, @NonNull Button btnShortcutMouseRClick,
+      @NonNull Button btnShortcutMouseXY, @NonNull Button btnShortcutTab,
       @NonNull Button btnShortcutText, @NonNull EditText etMacroContent,
       @NonNull EditText etMacroName, @NonNull ListView lvMacros) {
     this.rootView = rootView;
@@ -72,10 +86,14 @@ public final class ActivityMacroBinding implements ViewBinding {
     this.btnSaveMacro = btnSaveMacro;
     this.btnShortcutAltTab = btnShortcutAltTab;
     this.btnShortcutCtrlF = btnShortcutCtrlF;
+    this.btnShortcutCtrlF4 = btnShortcutCtrlF4;
     this.btnShortcutCtrlTab = btnShortcutCtrlTab;
     this.btnShortcutDelay = btnShortcutDelay;
     this.btnShortcutEnter = btnShortcutEnter;
     this.btnShortcutEsc = btnShortcutEsc;
+    this.btnShortcutMouseLClick = btnShortcutMouseLClick;
+    this.btnShortcutMouseRClick = btnShortcutMouseRClick;
+    this.btnShortcutMouseXY = btnShortcutMouseXY;
     this.btnShortcutTab = btnShortcutTab;
     this.btnShortcutText = btnShortcutText;
     this.etMacroContent = etMacroContent;
@@ -134,6 +152,12 @@ public final class ActivityMacroBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnShortcutCtrlF4;
+      Button btnShortcutCtrlF4 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCtrlF4 == null) {
+        break missingId;
+      }
+
       id = R.id.btnShortcutCtrlTab;
       Button btnShortcutCtrlTab = ViewBindings.findChildViewById(rootView, id);
       if (btnShortcutCtrlTab == null) {
@@ -155,6 +179,24 @@ public final class ActivityMacroBinding implements ViewBinding {
       id = R.id.btnShortcutEsc;
       Button btnShortcutEsc = ViewBindings.findChildViewById(rootView, id);
       if (btnShortcutEsc == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutMouseLClick;
+      Button btnShortcutMouseLClick = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutMouseLClick == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutMouseRClick;
+      Button btnShortcutMouseRClick = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutMouseRClick == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutMouseXY;
+      Button btnShortcutMouseXY = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutMouseXY == null) {
         break missingId;
       }
 
@@ -189,9 +231,10 @@ public final class ActivityMacroBinding implements ViewBinding {
       }
 
       return new ActivityMacroBinding((LinearLayout) rootView, btnCancel, btnSaveMacro,
-          btnShortcutAltTab, btnShortcutCtrlF, btnShortcutCtrlTab, btnShortcutDelay,
-          btnShortcutEnter, btnShortcutEsc, btnShortcutTab, btnShortcutText, etMacroContent,
-          etMacroName, lvMacros);
+          btnShortcutAltTab, btnShortcutCtrlF, btnShortcutCtrlF4, btnShortcutCtrlTab,
+          btnShortcutDelay, btnShortcutEnter, btnShortcutEsc, btnShortcutMouseLClick,
+          btnShortcutMouseRClick, btnShortcutMouseXY, btnShortcutTab, btnShortcutText,
+          etMacroContent, etMacroName, lvMacros);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

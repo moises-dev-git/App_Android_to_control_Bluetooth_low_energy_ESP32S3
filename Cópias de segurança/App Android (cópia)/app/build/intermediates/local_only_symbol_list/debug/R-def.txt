@@ -1,0 +1,18 @@
+R_DEF: Internal format may change without notice
+local
+dimen fab_margin
+id btnChrome
+id btnCopy
+id btnLClick
+id btnPaste
+id btnRClick
+id btnSendText
+id devicesListView
+id etText
+id fab
+id tvStatus
+layout activity_control
+layout activity_main
+string app_name
+style Base.Theme.ESP32App
+style Theme.ESP32App

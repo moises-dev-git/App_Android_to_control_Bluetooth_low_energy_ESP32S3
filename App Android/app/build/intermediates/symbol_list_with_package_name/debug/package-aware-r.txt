@@ -3186,10 +3186,14 @@ id btnSaveMacro
 id btnSendText
 id btnShortcutAltTab
 id btnShortcutCtrlF
+id btnShortcutCtrlF4
 id btnShortcutCtrlTab
 id btnShortcutDelay
 id btnShortcutEnter
 id btnShortcutEsc
+id btnShortcutMouseLClick
+id btnShortcutMouseRClick
+id btnShortcutMouseXY
 id btnShortcutTab
 id btnShortcutText
 id buttonPanel

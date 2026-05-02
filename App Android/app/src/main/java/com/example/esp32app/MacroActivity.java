@@ -39,13 +39,16 @@ public class MacroActivity extends AppCompatActivity {
         int[] buttonIds = {
                 R.id.btnShortcutTab, R.id.btnShortcutEnter, R.id.btnShortcutCtrlF,
                 R.id.btnShortcutEsc, R.id.btnShortcutAltTab, R.id.btnShortcutCtrlTab,
-                R.id.btnShortcutText, R.id.btnShortcutDelay
+                R.id.btnShortcutText, R.id.btnShortcutDelay, R.id.btnShortcutCtrlF4,
+                R.id.btnShortcutMouseLClick, R.id.btnShortcutMouseRClick, R.id.btnShortcutMouseXY
         };
 
         String[] shortcuts = {
                 "TAB\n", "ENTER\n", "CTRL_F\n",
                 "ESC\n", "ALT_TAB\n", "CTRL_TAB\n",
-                "TEXT:", "DELAY:500\n"
+                "TEXT:", "DELAY:500\n", "CTRL_F4\n",
+                "MOUSE_LCLICK\n", "MOUSE_RCLICK\n",
+                "MOUSE:x,y\n"
         };
 
         for (int i = 0; i < buttonIds.length; i++) {
