@@ -1,0 +1,12 @@
+# Android & Gradle build files
+.gradle/
+**/build/
+local.properties
+.idea/
+*.iml
+.theia/
+
+# OS / Temporary files
+.DS_Store
+Thumbs.db
+*.tmp
