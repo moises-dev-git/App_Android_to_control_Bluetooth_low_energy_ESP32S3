@@ -1,119 +1,312 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Gerenciar Macros"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
-
-    <EditText
-        android:id="@+id/etMacroName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Nome do Macro (Ex: Buscar Link)"
-        android:layout_marginBottom="8dp"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Inserir Atalhos (Um por linha):"/>
-
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="3"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:alignmentMode="alignMargins"
-        android:columnOrderPreserved="false">
-
-        <Button android:id="@+id/btnShortcutTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall" />
-        <Button android:id="@+id/btnShortcutEnter" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Enter" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-        <Button android:id="@+id/btnShortcutCtrlF" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Ctrl+F" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-        
-        <Button android:id="@+id/btnShortcutEsc" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Esc" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-        <Button android:id="@+id/btnShortcutAltTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Alt+Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-        <Button android:id="@+id/btnShortcutCtrlTab" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Ctrl+Tab" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-        <Button android:id="@+id/btnShortcutText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Text:" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-        <Button android:id="@+id/btnShortcutDelay" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="Delay:500" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-        <Button android:id="@+id/btnShortcutCtrlF4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="CTRL_F4" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-        <Button android:id="@+id/btnShortcutMouseLClick" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE_LCLICK" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-        <Button android:id="@+id/btnShortcutMouseRClick" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE_RCLICK" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-        <Button android:id="@+id/btnShortcutMouseXY" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="MOUSE:XY" android:textSize="12sp" android:layout_margin="2dp" style="?android:attr/buttonStyleSmall"/>
-
-
-
-    </GridLayout>
-
-    <EditText
-        android:id="@+id/etMacroContent"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="top|start"
-        android:hint="Exemplo:\nCTRL_F\nDELAY:500\nTEXT:meu link\nENTER"
-        android:inputType="textMultiLine"
-        android:lines="6"
-        android:scrollHorizontally="false"
-        android:background="#f4f4f4"
-        android:padding="8dp"/>
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cancelar"
-            android:layout_marginRight="4dp"/>
+            android:text="Gerenciar Macros"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
 
-        <Button
-            android:id="@+id/btnSaveMacro"
-            android:layout_width="0dp"
+        <EditText
+            android:id="@+id/etMacroName"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#28a745"
-            android:textColor="#FFFFFF"
-            android:text="Salvar Macro"
-            android:layout_marginLeft="4dp"/>
+            android:hint="Nome da Macro (Ex: Abrir Gerenciador)"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Seção de Combinação de Teclas Modificadoras -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Montar Combinação Personalizada (Ctrl, Alt, Shift, Win):"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/cbCtrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ctrl"
+                android:textSize="12sp"/>
+
+            <CheckBox
+                android:id="@+id/cbAlt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Alt"
+                android:textSize="12sp"/>
+
+            <CheckBox
+                android:id="@+id/cbShift"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shift"
+                android:textSize="12sp"/>
+
+            <CheckBox
+                android:id="@+id/cbWin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Win"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/etComboKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Tecla (Ex: F4, c, z, ESC, DEL, TAB, ENTER)"
+                android:textSize="14sp"
+                android:inputType="text"/>
+
+            <Button
+                android:id="@+id/btnAddCombo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ Inserir"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <!-- CARROSSEL DE CATEGORIAS DE TECLAS E ATALHOS -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Teclas Especiais e Atalhos (Deslize para o lado ➔):"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"/>
+
+        <!-- Categoria 1: Atalhos Comuns -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚡ Atalhos Rápidos"
+            android:textSize="11sp"
+            android:textColor="#555555"
+            android:textStyle="bold"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="6dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnShortcutCtrlZ" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ctrl+Z" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutCtrlC" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ctrl+C" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutCtrlV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ctrl+V" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutCtrlShiftEsc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ctrl+Shift+Esc" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutAltF4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Alt+F4" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutWinD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Win+D" android:textSize="11sp" style="?android:attr/buttonStyleSmall"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Categoria 2: Edição e Controle -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎹 Edição &amp; Controle"
+            android:textSize="11sp"
+            android:textColor="#555555"
+            android:textStyle="bold"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="6dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnShortcutEnter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Enter" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutTab" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tab" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutEsc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Esc" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutSpace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Space" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutBackspace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Backspace" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutDelete" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Delete" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutInsert" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Insert" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutHome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutEnd" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="End" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutPageUp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PageUp" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutPageDown" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PageDown" android:textSize="11sp" style="?android:attr/buttonStyleSmall"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Categoria 3: Setas de Navegação -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎯 Navegação &amp; Setas"
+            android:textSize="11sp"
+            android:textColor="#555555"
+            android:textStyle="bold"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="6dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnShortcutUp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↑ Up" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutDown" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↓ Down" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="← Left" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="→ Right" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutCapsLock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Caps Lock" android:textSize="11sp" style="?android:attr/buttonStyleSmall"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Categoria 4: Teclas F1 a F12 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🛠️ Teclas de Função (F1 a F12)"
+            android:textSize="11sp"
+            android:textColor="#555555"
+            android:textStyle="bold"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="6dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnShortcutF1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F1" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F2" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F3" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F4" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F5" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F6" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F7" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F8" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF9" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F9" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF10" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F10" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF11" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F11" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutF12" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="F12" android:textSize="11sp" style="?android:attr/buttonStyleSmall"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Categoria 5: Ações & Comandos Especial -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🖱️ Ações &amp; Comandos"
+            android:textSize="11sp"
+            android:textColor="#555555"
+            android:textStyle="bold"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="8dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btnShortcutText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Text:" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutDelay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Delay:500" android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutMouseLClick" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Click Esq." android:textSize="11sp" style="?android:attr/buttonStyleSmall" android:layout_marginRight="4dp"/>
+                <Button android:id="@+id/btnShortcutMouseRClick" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Click Dir." android:textSize="11sp" style="?android:attr/buttonStyleSmall"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Edição do Conteúdo da Macro -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Conteúdo da Sequência (Um por linha):"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etMacroContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="6"
+            android:maxLines="12"
+            android:gravity="top|start"
+            android:hint="Exemplo:\nCTRL+SHIFT+ESC\nDELAY:500\nTEXT:meu texto\nENTER"
+            android:inputType="textMultiLine"
+            android:scrollHorizontally="false"
+            android:background="#f4f4f4"
+            android:padding="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancelar"
+                android:layout_marginRight="4dp"/>
+
+            <Button
+                android:id="@+id/btnSaveMacro"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#28a745"
+                android:textColor="#FFFFFF"
+                android:text="Salvar Macro"
+                android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#ccc"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Macros Salvas (clique para editar, segure para excluir):"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
+
+        <ListView
+            android:id="@+id/lvMacros"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="true"/>
+
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#ccc"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"/>
-        
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Macros Salvos (clique para editar, segure para excluir):"
-        android:textSize="14sp"/>
-
-    <ListView
-        android:id="@+id/lvMacros"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
-
-</LinearLayout>
+</ScrollView>

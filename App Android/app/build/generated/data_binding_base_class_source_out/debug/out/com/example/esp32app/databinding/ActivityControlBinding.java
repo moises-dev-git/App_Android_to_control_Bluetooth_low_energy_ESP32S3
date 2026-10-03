@@ -5,8 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -20,7 +21,7 @@ import java.lang.String;
 
 public final class ActivityControlBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final ScrollView rootView;
 
   @NonNull
   public final Button btnChrome;
@@ -44,7 +45,25 @@ public final class ActivityControlBinding implements ViewBinding {
   public final Button btnRunMacro;
 
   @NonNull
+  public final Button btnSendCombo;
+
+  @NonNull
   public final Button btnSendText;
+
+  @NonNull
+  public final CheckBox cbAltControl;
+
+  @NonNull
+  public final CheckBox cbCtrlControl;
+
+  @NonNull
+  public final CheckBox cbShiftControl;
+
+  @NonNull
+  public final CheckBox cbWinControl;
+
+  @NonNull
+  public final EditText etControlComboKey;
 
   @NonNull
   public final EditText etText;
@@ -55,11 +74,13 @@ public final class ActivityControlBinding implements ViewBinding {
   @NonNull
   public final TextView tvStatus;
 
-  private ActivityControlBinding(@NonNull LinearLayout rootView, @NonNull Button btnChrome,
+  private ActivityControlBinding(@NonNull ScrollView rootView, @NonNull Button btnChrome,
       @NonNull Button btnCopy, @NonNull Button btnLClick, @NonNull Button btnManageMacros,
       @NonNull Button btnPaste, @NonNull Button btnRClick, @NonNull Button btnRunMacro,
-      @NonNull Button btnSendText, @NonNull EditText etText, @NonNull Spinner spinnerMacros,
-      @NonNull TextView tvStatus) {
+      @NonNull Button btnSendCombo, @NonNull Button btnSendText, @NonNull CheckBox cbAltControl,
+      @NonNull CheckBox cbCtrlControl, @NonNull CheckBox cbShiftControl,
+      @NonNull CheckBox cbWinControl, @NonNull EditText etControlComboKey, @NonNull EditText etText,
+      @NonNull Spinner spinnerMacros, @NonNull TextView tvStatus) {
     this.rootView = rootView;
     this.btnChrome = btnChrome;
     this.btnCopy = btnCopy;
@@ -68,7 +89,13 @@ public final class ActivityControlBinding implements ViewBinding {
     this.btnPaste = btnPaste;
     this.btnRClick = btnRClick;
     this.btnRunMacro = btnRunMacro;
+    this.btnSendCombo = btnSendCombo;
     this.btnSendText = btnSendText;
+    this.cbAltControl = cbAltControl;
+    this.cbCtrlControl = cbCtrlControl;
+    this.cbShiftControl = cbShiftControl;
+    this.cbWinControl = cbWinControl;
+    this.etControlComboKey = etControlComboKey;
     this.etText = etText;
     this.spinnerMacros = spinnerMacros;
     this.tvStatus = tvStatus;
@@ -76,7 +103,7 @@ public final class ActivityControlBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public ScrollView getRoot() {
     return rootView;
   }
 
@@ -143,9 +170,45 @@ public final class ActivityControlBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnSendCombo;
+      Button btnSendCombo = ViewBindings.findChildViewById(rootView, id);
+      if (btnSendCombo == null) {
+        break missingId;
+      }
+
       id = R.id.btnSendText;
       Button btnSendText = ViewBindings.findChildViewById(rootView, id);
       if (btnSendText == null) {
+        break missingId;
+      }
+
+      id = R.id.cbAltControl;
+      CheckBox cbAltControl = ViewBindings.findChildViewById(rootView, id);
+      if (cbAltControl == null) {
+        break missingId;
+      }
+
+      id = R.id.cbCtrlControl;
+      CheckBox cbCtrlControl = ViewBindings.findChildViewById(rootView, id);
+      if (cbCtrlControl == null) {
+        break missingId;
+      }
+
+      id = R.id.cbShiftControl;
+      CheckBox cbShiftControl = ViewBindings.findChildViewById(rootView, id);
+      if (cbShiftControl == null) {
+        break missingId;
+      }
+
+      id = R.id.cbWinControl;
+      CheckBox cbWinControl = ViewBindings.findChildViewById(rootView, id);
+      if (cbWinControl == null) {
+        break missingId;
+      }
+
+      id = R.id.etControlComboKey;
+      EditText etControlComboKey = ViewBindings.findChildViewById(rootView, id);
+      if (etControlComboKey == null) {
         break missingId;
       }
 
@@ -167,9 +230,10 @@ public final class ActivityControlBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityControlBinding((LinearLayout) rootView, btnChrome, btnCopy, btnLClick,
-          btnManageMacros, btnPaste, btnRClick, btnRunMacro, btnSendText, etText, spinnerMacros,
-          tvStatus);
+      return new ActivityControlBinding((ScrollView) rootView, btnChrome, btnCopy, btnLClick,
+          btnManageMacros, btnPaste, btnRClick, btnRunMacro, btnSendCombo, btnSendText,
+          cbAltControl, cbCtrlControl, cbShiftControl, cbWinControl, etControlComboKey, etText,
+          spinnerMacros, tvStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

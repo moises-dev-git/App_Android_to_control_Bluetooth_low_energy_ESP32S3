@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,8 +20,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import java.util.List;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressLint("MissingPermission")
@@ -36,9 +38,10 @@ public class ControlActivity extends AppCompatActivity {
     private BluetoothGatt bluetoothGatt;
     private BluetoothGattCharacteristic rxCharacteristic;
 
-    private TextView tvStatus, tvTemperature;
-    private EditText etText;
-    private Button btnSendText, btnChrome, btnCopy, btnPaste, btnLClick, btnRClick;
+    private TextView tvStatus;
+    private EditText etText, etControlComboKey;
+    private CheckBox cbCtrlControl, cbAltControl, cbShiftControl, cbWinControl;
+    private Button btnSendText, btnSendCombo, btnChrome, btnCopy, btnPaste, btnLClick, btnRClick;
     private Spinner spinnerMacros;
     private Button btnRunMacro, btnManageMacros;
 
@@ -50,6 +53,14 @@ public class ControlActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tvStatus);
         etText = findViewById(R.id.etText);
         btnSendText = findViewById(R.id.btnSendText);
+
+        etControlComboKey = findViewById(R.id.etControlComboKey);
+        cbCtrlControl = findViewById(R.id.cbCtrlControl);
+        cbAltControl = findViewById(R.id.cbAltControl);
+        cbShiftControl = findViewById(R.id.cbShiftControl);
+        cbWinControl = findViewById(R.id.cbWinControl);
+        btnSendCombo = findViewById(R.id.btnSendCombo);
+
         btnChrome = findViewById(R.id.btnChrome);
         btnCopy = findViewById(R.id.btnCopy);
         btnPaste = findViewById(R.id.btnPaste);
@@ -71,7 +82,7 @@ public class ControlActivity extends AppCompatActivity {
             finish();
             return;
         }
-        
+
         BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 
@@ -83,12 +94,13 @@ public class ControlActivity extends AppCompatActivity {
 
     private void setupButtons() {
         btnSendText.setOnClickListener(v -> sendCommand("TXT:" + etText.getText().toString()));
+        btnSendCombo.setOnClickListener(v -> sendCustomCombo());
         btnChrome.setOnClickListener(v -> sendCommand("CMD:CHROME"));
         btnCopy.setOnClickListener(v -> sendCommand("CMD:COPY"));
         btnPaste.setOnClickListener(v -> sendCommand("CMD:PASTE"));
         btnLClick.setOnClickListener(v -> sendCommand("CMD:MOUSE_LCLICK"));
         btnRClick.setOnClickListener(v -> sendCommand("CMD:MOUSE_RCLICK"));
-        
+
         btnManageMacros.setOnClickListener(v -> {
             startActivity(new Intent(this, MacroActivity.class));
         });
@@ -98,9 +110,31 @@ public class ControlActivity extends AppCompatActivity {
             if (selected != null) {
                 sendCommand("SEQ:" + selected.getContent());
             } else {
-                Toast.makeText(this, "Nenhum macro selecionado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Nenhuma macro selecionada", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void sendCustomCombo() {
+        String key = etControlComboKey.getText().toString().trim();
+        if (key.isEmpty()) {
+            Toast.makeText(this, "Informe a tecla desejada", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<String> modifiers = new ArrayList<>();
+        if (cbCtrlControl.isChecked()) modifiers.add("CTRL");
+        if (cbAltControl.isChecked()) modifiers.add("ALT");
+        if (cbShiftControl.isChecked()) modifiers.add("SHIFT");
+        if (cbWinControl.isChecked()) modifiers.add("WIN");
+
+        StringBuilder combo = new StringBuilder();
+        for (int i = 0; i < modifiers.size(); i++) {
+            combo.append(modifiers.get(i)).append("+");
+        }
+        combo.append(key.toUpperCase());
+
+        sendCommand("CMD:KEY:" + combo.toString());
     }
 
     @Override
@@ -115,6 +149,7 @@ public class ControlActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             tvStatus.setText("Conectado! Pronto para enviar.");
             btnSendText.setEnabled(true);
+            btnSendCombo.setEnabled(true);
             btnChrome.setEnabled(true);
             btnCopy.setEnabled(true);
             btnPaste.setEnabled(true);
@@ -138,14 +173,29 @@ public class ControlActivity extends AppCompatActivity {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED) {
-                runOnUiThread(() -> tvStatus.setText("Conectado! Descobrindo serviços..."));
-                gatt.discoverServices();
+                runOnUiThread(() -> tvStatus.setText("Conectado! Configurando conexão..."));
+                boolean mtuRequested = gatt.requestMtu(512);
+                if (!mtuRequested) {
+                    gatt.discoverServices();
+                }
             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                if (gatt != null) {
+                    gatt.close();
+                }
                 runOnUiThread(() -> {
                     tvStatus.setText("Desconectado");
-                    finish(); // Fechar tela e voltar
+                    if (!isDestroyed() && !isFinishing()) {
+                        finish();
+                    }
                 });
             }
+        }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            runOnUiThread(() -> tvStatus.setText("Conectado! Descobrindo serviços..."));
+            gatt.discoverServices();
         }
 
         @Override
@@ -154,13 +204,13 @@ public class ControlActivity extends AppCompatActivity {
                 BluetoothGattService service = gatt.getService(SERVICE_UUID);
                 if (service != null) {
                     rxCharacteristic = service.getCharacteristic(CHARACTERISTIC_UUID_RX);
-                    
+
                     BluetoothGattCharacteristic txCharacteristic = service.getCharacteristic(CHARACTERISTIC_UUID_TX);
                     if (txCharacteristic != null) {
                         gatt.setCharacteristicNotification(txCharacteristic, true);
-                        android.bluetooth.BluetoothGattDescriptor descriptor = txCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
+                        android.bluetooth.BluetoothGattDescriptor descriptor = txCharacteristic
+                                .getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
                         if (descriptor != null) {
-                            // Em Android SDKs recentes, pode ser getWriteType()
                             descriptor.setValue(android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                             gatt.writeDescriptor(descriptor);
                         }
@@ -176,7 +226,7 @@ public class ControlActivity extends AppCompatActivity {
                 }
             }
         }
-        
+
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             if (CHARACTERISTIC_UUID_TX.equals(characteristic.getUuid())) {
@@ -185,8 +235,6 @@ public class ControlActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         if (rx.startsWith("TEMP:")) {
                             tvStatus.setText("Conectado | ESP Temp: " + rx.substring(5));
-                        } else {
-                            //Toast.makeText(ControlActivity.this, rx, Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -199,7 +247,6 @@ public class ControlActivity extends AppCompatActivity {
         super.onDestroy();
         if (bluetoothGatt != null) {
             bluetoothGatt.disconnect();
-            bluetoothGatt.close();
         }
     }
 }

@@ -4,17 +4,21 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MacroActivity extends AppCompatActivity {
 
-    private EditText etMacroName, etMacroContent;
+    private EditText etMacroName, etMacroContent, etComboKey;
+    private CheckBox cbCtrl, cbAlt, cbShift, cbWin;
+    private Button btnAddCombo;
     private ListView lvMacros;
     private List<Macro> savedMacros;
     private ArrayAdapter<Macro> adapter;
@@ -26,29 +30,94 @@ public class MacroActivity extends AppCompatActivity {
 
         etMacroName = findViewById(R.id.etMacroName);
         etMacroContent = findViewById(R.id.etMacroContent);
+        etComboKey = findViewById(R.id.etComboKey);
+        cbCtrl = findViewById(R.id.cbCtrl);
+        cbAlt = findViewById(R.id.cbAlt);
+        cbShift = findViewById(R.id.cbShift);
+        cbWin = findViewById(R.id.cbWin);
+        btnAddCombo = findViewById(R.id.btnAddCombo);
         lvMacros = findViewById(R.id.lvMacros);
 
         findViewById(R.id.btnCancel).setOnClickListener(v -> finish());
         findViewById(R.id.btnSaveMacro).setOnClickListener(v -> saveMacro());
 
+        btnAddCombo.setOnClickListener(v -> addCustomCombo());
+
         setupShortcutButtons();
         loadMacros();
     }
 
+    private void addCustomCombo() {
+        String key = etComboKey.getText().toString().trim();
+        if (key.isEmpty()) {
+            Toast.makeText(this, "Informe a tecla para a combinação", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<String> modifiers = new ArrayList<>();
+        if (cbCtrl.isChecked()) modifiers.add("CTRL");
+        if (cbAlt.isChecked()) modifiers.add("ALT");
+        if (cbShift.isChecked()) modifiers.add("SHIFT");
+        if (cbWin.isChecked()) modifiers.add("WIN");
+
+        StringBuilder combo = new StringBuilder();
+        for (int i = 0; i < modifiers.size(); i++) {
+            combo.append(modifiers.get(i)).append("+");
+        }
+        combo.append(key.toUpperCase());
+        combo.append("\n");
+
+        appendShortcut(combo.toString());
+        etComboKey.setText("");
+    }
+
     private void setupShortcutButtons() {
         int[] buttonIds = {
-                R.id.btnShortcutTab, R.id.btnShortcutEnter, R.id.btnShortcutCtrlF,
-                R.id.btnShortcutEsc, R.id.btnShortcutAltTab, R.id.btnShortcutCtrlTab,
-                R.id.btnShortcutText, R.id.btnShortcutDelay, R.id.btnShortcutCtrlF4,
-                R.id.btnShortcutMouseLClick, R.id.btnShortcutMouseRClick, R.id.btnShortcutMouseXY
+                // Atalhos Rápidos
+                R.id.btnShortcutCtrlZ, R.id.btnShortcutCtrlC, R.id.btnShortcutCtrlV,
+                R.id.btnShortcutCtrlShiftEsc, R.id.btnShortcutAltF4, R.id.btnShortcutWinD,
+
+                // Edição & Controle
+                R.id.btnShortcutEnter, R.id.btnShortcutTab, R.id.btnShortcutEsc,
+                R.id.btnShortcutSpace, R.id.btnShortcutBackspace, R.id.btnShortcutDelete,
+                R.id.btnShortcutInsert, R.id.btnShortcutHome, R.id.btnShortcutEnd,
+                R.id.btnShortcutPageUp, R.id.btnShortcutPageDown,
+
+                // Setas & Navegação
+                R.id.btnShortcutUp, R.id.btnShortcutDown, R.id.btnShortcutLeft, R.id.btnShortcutRight,
+                R.id.btnShortcutCapsLock,
+
+                // Teclas de Função F1 a F12
+                R.id.btnShortcutF1, R.id.btnShortcutF2, R.id.btnShortcutF3, R.id.btnShortcutF4,
+                R.id.btnShortcutF5, R.id.btnShortcutF6, R.id.btnShortcutF7, R.id.btnShortcutF8,
+                R.id.btnShortcutF9, R.id.btnShortcutF10, R.id.btnShortcutF11, R.id.btnShortcutF12,
+
+                // Ações & Comandos
+                R.id.btnShortcutText, R.id.btnShortcutDelay, R.id.btnShortcutMouseLClick, R.id.btnShortcutMouseRClick
         };
 
         String[] shortcuts = {
-                "TAB\n", "ENTER\n", "CTRL_F\n",
-                "ESC\n", "ALT_TAB\n", "CTRL_TAB\n",
-                "TEXT:", "DELAY:500\n", "CTRL_F4\n",
-                "MOUSE_LCLICK\n", "MOUSE_RCLICK\n",
-                "MOUSE:x,y\n"
+                // Atalhos Rápidos
+                "CTRL+Z\n", "CTRL+C\n", "CTRL+V\n",
+                "CTRL+SHIFT+ESC\n", "ALT+F4\n", "WIN+D\n",
+
+                // Edição & Controle
+                "ENTER\n", "TAB\n", "ESC\n",
+                "SPACE\n", "BACKSPACE\n", "DELETE\n",
+                "INSERT\n", "HOME\n", "END\n",
+                "PAGEUP\n", "PAGEDOWN\n",
+
+                // Setas & Navegação
+                "UP\n", "DOWN\n", "LEFT\n", "RIGHT\n",
+                "CAPSLOCK\n",
+
+                // Teclas de Função F1 a F12
+                "F1\n", "F2\n", "F3\n", "F4\n",
+                "F5\n", "F6\n", "F7\n", "F8\n",
+                "F9\n", "F10\n", "F11\n", "F12\n",
+
+                // Ações & Comandos
+                "TEXT:\n", "DELAY:500\n", "MOUSE_LCLICK\n", "MOUSE_RCLICK\n"
         };
 
         for (int i = 0; i < buttonIds.length; i++) {
@@ -74,7 +143,6 @@ public class MacroActivity extends AppCompatActivity {
             return;
         }
 
-        // overwrite existing if same name, or add new
         boolean found = false;
         for (int i = 0; i < savedMacros.size(); i++) {
             if (savedMacros.get(i).getName().equalsIgnoreCase(name)) {
@@ -88,7 +156,7 @@ public class MacroActivity extends AppCompatActivity {
         }
 
         MacroManager.saveMacros(this, savedMacros);
-        Toast.makeText(this, "Macro Salvo!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Macro Salva!", Toast.LENGTH_SHORT).show();
         etMacroName.setText("");
         etMacroContent.setText("");
         loadMacros();
@@ -108,12 +176,12 @@ public class MacroActivity extends AppCompatActivity {
         lvMacros.setOnItemLongClickListener((parent, view, position, id) -> {
             new AlertDialog.Builder(this)
                     .setTitle("Excluir Macro")
-                    .setMessage("Tem certeza que deseja excluir o macro: " + savedMacros.get(position).getName() + "?")
+                    .setMessage("Tem certeza que deseja excluir a macro: " + savedMacros.get(position).getName() + "?")
                     .setPositiveButton("Sim", (dialog, which) -> {
                         savedMacros.remove(position);
                         MacroManager.saveMacros(this, savedMacros);
                         loadMacros();
-                        Toast.makeText(this, "Macro excluído", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Macro excluída", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("Não", null)
                     .show();

@@ -5,9 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -19,7 +20,10 @@ import java.lang.String;
 
 public final class ActivityMacroBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final ScrollView rootView;
+
+  @NonNull
+  public final Button btnAddCombo;
 
   @NonNull
   public final Button btnCancel;
@@ -28,19 +32,37 @@ public final class ActivityMacroBinding implements ViewBinding {
   public final Button btnSaveMacro;
 
   @NonNull
-  public final Button btnShortcutAltTab;
+  public final Button btnShortcutAltF4;
 
   @NonNull
-  public final Button btnShortcutCtrlF;
+  public final Button btnShortcutBackspace;
 
   @NonNull
-  public final Button btnShortcutCtrlF4;
+  public final Button btnShortcutCapsLock;
 
   @NonNull
-  public final Button btnShortcutCtrlTab;
+  public final Button btnShortcutCtrlC;
+
+  @NonNull
+  public final Button btnShortcutCtrlShiftEsc;
+
+  @NonNull
+  public final Button btnShortcutCtrlV;
+
+  @NonNull
+  public final Button btnShortcutCtrlZ;
 
   @NonNull
   public final Button btnShortcutDelay;
+
+  @NonNull
+  public final Button btnShortcutDelete;
+
+  @NonNull
+  public final Button btnShortcutDown;
+
+  @NonNull
+  public final Button btnShortcutEnd;
 
   @NonNull
   public final Button btnShortcutEnter;
@@ -49,19 +71,94 @@ public final class ActivityMacroBinding implements ViewBinding {
   public final Button btnShortcutEsc;
 
   @NonNull
+  public final Button btnShortcutF1;
+
+  @NonNull
+  public final Button btnShortcutF10;
+
+  @NonNull
+  public final Button btnShortcutF11;
+
+  @NonNull
+  public final Button btnShortcutF12;
+
+  @NonNull
+  public final Button btnShortcutF2;
+
+  @NonNull
+  public final Button btnShortcutF3;
+
+  @NonNull
+  public final Button btnShortcutF4;
+
+  @NonNull
+  public final Button btnShortcutF5;
+
+  @NonNull
+  public final Button btnShortcutF6;
+
+  @NonNull
+  public final Button btnShortcutF7;
+
+  @NonNull
+  public final Button btnShortcutF8;
+
+  @NonNull
+  public final Button btnShortcutF9;
+
+  @NonNull
+  public final Button btnShortcutHome;
+
+  @NonNull
+  public final Button btnShortcutInsert;
+
+  @NonNull
+  public final Button btnShortcutLeft;
+
+  @NonNull
   public final Button btnShortcutMouseLClick;
 
   @NonNull
   public final Button btnShortcutMouseRClick;
 
   @NonNull
-  public final Button btnShortcutMouseXY;
+  public final Button btnShortcutPageDown;
+
+  @NonNull
+  public final Button btnShortcutPageUp;
+
+  @NonNull
+  public final Button btnShortcutRight;
+
+  @NonNull
+  public final Button btnShortcutSpace;
 
   @NonNull
   public final Button btnShortcutTab;
 
   @NonNull
   public final Button btnShortcutText;
+
+  @NonNull
+  public final Button btnShortcutUp;
+
+  @NonNull
+  public final Button btnShortcutWinD;
+
+  @NonNull
+  public final CheckBox cbAlt;
+
+  @NonNull
+  public final CheckBox cbCtrl;
+
+  @NonNull
+  public final CheckBox cbShift;
+
+  @NonNull
+  public final CheckBox cbWin;
+
+  @NonNull
+  public final EditText etComboKey;
 
   @NonNull
   public final EditText etMacroContent;
@@ -72,30 +169,74 @@ public final class ActivityMacroBinding implements ViewBinding {
   @NonNull
   public final ListView lvMacros;
 
-  private ActivityMacroBinding(@NonNull LinearLayout rootView, @NonNull Button btnCancel,
-      @NonNull Button btnSaveMacro, @NonNull Button btnShortcutAltTab,
-      @NonNull Button btnShortcutCtrlF, @NonNull Button btnShortcutCtrlF4,
-      @NonNull Button btnShortcutCtrlTab, @NonNull Button btnShortcutDelay,
+  private ActivityMacroBinding(@NonNull ScrollView rootView, @NonNull Button btnAddCombo,
+      @NonNull Button btnCancel, @NonNull Button btnSaveMacro, @NonNull Button btnShortcutAltF4,
+      @NonNull Button btnShortcutBackspace, @NonNull Button btnShortcutCapsLock,
+      @NonNull Button btnShortcutCtrlC, @NonNull Button btnShortcutCtrlShiftEsc,
+      @NonNull Button btnShortcutCtrlV, @NonNull Button btnShortcutCtrlZ,
+      @NonNull Button btnShortcutDelay, @NonNull Button btnShortcutDelete,
+      @NonNull Button btnShortcutDown, @NonNull Button btnShortcutEnd,
       @NonNull Button btnShortcutEnter, @NonNull Button btnShortcutEsc,
-      @NonNull Button btnShortcutMouseLClick, @NonNull Button btnShortcutMouseRClick,
-      @NonNull Button btnShortcutMouseXY, @NonNull Button btnShortcutTab,
-      @NonNull Button btnShortcutText, @NonNull EditText etMacroContent,
-      @NonNull EditText etMacroName, @NonNull ListView lvMacros) {
+      @NonNull Button btnShortcutF1, @NonNull Button btnShortcutF10, @NonNull Button btnShortcutF11,
+      @NonNull Button btnShortcutF12, @NonNull Button btnShortcutF2, @NonNull Button btnShortcutF3,
+      @NonNull Button btnShortcutF4, @NonNull Button btnShortcutF5, @NonNull Button btnShortcutF6,
+      @NonNull Button btnShortcutF7, @NonNull Button btnShortcutF8, @NonNull Button btnShortcutF9,
+      @NonNull Button btnShortcutHome, @NonNull Button btnShortcutInsert,
+      @NonNull Button btnShortcutLeft, @NonNull Button btnShortcutMouseLClick,
+      @NonNull Button btnShortcutMouseRClick, @NonNull Button btnShortcutPageDown,
+      @NonNull Button btnShortcutPageUp, @NonNull Button btnShortcutRight,
+      @NonNull Button btnShortcutSpace, @NonNull Button btnShortcutTab,
+      @NonNull Button btnShortcutText, @NonNull Button btnShortcutUp,
+      @NonNull Button btnShortcutWinD, @NonNull CheckBox cbAlt, @NonNull CheckBox cbCtrl,
+      @NonNull CheckBox cbShift, @NonNull CheckBox cbWin, @NonNull EditText etComboKey,
+      @NonNull EditText etMacroContent, @NonNull EditText etMacroName, @NonNull ListView lvMacros) {
     this.rootView = rootView;
+    this.btnAddCombo = btnAddCombo;
     this.btnCancel = btnCancel;
     this.btnSaveMacro = btnSaveMacro;
-    this.btnShortcutAltTab = btnShortcutAltTab;
-    this.btnShortcutCtrlF = btnShortcutCtrlF;
-    this.btnShortcutCtrlF4 = btnShortcutCtrlF4;
-    this.btnShortcutCtrlTab = btnShortcutCtrlTab;
+    this.btnShortcutAltF4 = btnShortcutAltF4;
+    this.btnShortcutBackspace = btnShortcutBackspace;
+    this.btnShortcutCapsLock = btnShortcutCapsLock;
+    this.btnShortcutCtrlC = btnShortcutCtrlC;
+    this.btnShortcutCtrlShiftEsc = btnShortcutCtrlShiftEsc;
+    this.btnShortcutCtrlV = btnShortcutCtrlV;
+    this.btnShortcutCtrlZ = btnShortcutCtrlZ;
     this.btnShortcutDelay = btnShortcutDelay;
+    this.btnShortcutDelete = btnShortcutDelete;
+    this.btnShortcutDown = btnShortcutDown;
+    this.btnShortcutEnd = btnShortcutEnd;
     this.btnShortcutEnter = btnShortcutEnter;
     this.btnShortcutEsc = btnShortcutEsc;
+    this.btnShortcutF1 = btnShortcutF1;
+    this.btnShortcutF10 = btnShortcutF10;
+    this.btnShortcutF11 = btnShortcutF11;
+    this.btnShortcutF12 = btnShortcutF12;
+    this.btnShortcutF2 = btnShortcutF2;
+    this.btnShortcutF3 = btnShortcutF3;
+    this.btnShortcutF4 = btnShortcutF4;
+    this.btnShortcutF5 = btnShortcutF5;
+    this.btnShortcutF6 = btnShortcutF6;
+    this.btnShortcutF7 = btnShortcutF7;
+    this.btnShortcutF8 = btnShortcutF8;
+    this.btnShortcutF9 = btnShortcutF9;
+    this.btnShortcutHome = btnShortcutHome;
+    this.btnShortcutInsert = btnShortcutInsert;
+    this.btnShortcutLeft = btnShortcutLeft;
     this.btnShortcutMouseLClick = btnShortcutMouseLClick;
     this.btnShortcutMouseRClick = btnShortcutMouseRClick;
-    this.btnShortcutMouseXY = btnShortcutMouseXY;
+    this.btnShortcutPageDown = btnShortcutPageDown;
+    this.btnShortcutPageUp = btnShortcutPageUp;
+    this.btnShortcutRight = btnShortcutRight;
+    this.btnShortcutSpace = btnShortcutSpace;
     this.btnShortcutTab = btnShortcutTab;
     this.btnShortcutText = btnShortcutText;
+    this.btnShortcutUp = btnShortcutUp;
+    this.btnShortcutWinD = btnShortcutWinD;
+    this.cbAlt = cbAlt;
+    this.cbCtrl = cbCtrl;
+    this.cbShift = cbShift;
+    this.cbWin = cbWin;
+    this.etComboKey = etComboKey;
     this.etMacroContent = etMacroContent;
     this.etMacroName = etMacroName;
     this.lvMacros = lvMacros;
@@ -103,7 +244,7 @@ public final class ActivityMacroBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public ScrollView getRoot() {
     return rootView;
   }
 
@@ -128,6 +269,12 @@ public final class ActivityMacroBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btnAddCombo;
+      Button btnAddCombo = ViewBindings.findChildViewById(rootView, id);
+      if (btnAddCombo == null) {
+        break missingId;
+      }
+
       id = R.id.btnCancel;
       Button btnCancel = ViewBindings.findChildViewById(rootView, id);
       if (btnCancel == null) {
@@ -140,33 +287,69 @@ public final class ActivityMacroBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.btnShortcutAltTab;
-      Button btnShortcutAltTab = ViewBindings.findChildViewById(rootView, id);
-      if (btnShortcutAltTab == null) {
+      id = R.id.btnShortcutAltF4;
+      Button btnShortcutAltF4 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutAltF4 == null) {
         break missingId;
       }
 
-      id = R.id.btnShortcutCtrlF;
-      Button btnShortcutCtrlF = ViewBindings.findChildViewById(rootView, id);
-      if (btnShortcutCtrlF == null) {
+      id = R.id.btnShortcutBackspace;
+      Button btnShortcutBackspace = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutBackspace == null) {
         break missingId;
       }
 
-      id = R.id.btnShortcutCtrlF4;
-      Button btnShortcutCtrlF4 = ViewBindings.findChildViewById(rootView, id);
-      if (btnShortcutCtrlF4 == null) {
+      id = R.id.btnShortcutCapsLock;
+      Button btnShortcutCapsLock = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCapsLock == null) {
         break missingId;
       }
 
-      id = R.id.btnShortcutCtrlTab;
-      Button btnShortcutCtrlTab = ViewBindings.findChildViewById(rootView, id);
-      if (btnShortcutCtrlTab == null) {
+      id = R.id.btnShortcutCtrlC;
+      Button btnShortcutCtrlC = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCtrlC == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutCtrlShiftEsc;
+      Button btnShortcutCtrlShiftEsc = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCtrlShiftEsc == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutCtrlV;
+      Button btnShortcutCtrlV = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCtrlV == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutCtrlZ;
+      Button btnShortcutCtrlZ = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutCtrlZ == null) {
         break missingId;
       }
 
       id = R.id.btnShortcutDelay;
       Button btnShortcutDelay = ViewBindings.findChildViewById(rootView, id);
       if (btnShortcutDelay == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutDelete;
+      Button btnShortcutDelete = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutDelete == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutDown;
+      Button btnShortcutDown = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutDown == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutEnd;
+      Button btnShortcutEnd = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutEnd == null) {
         break missingId;
       }
 
@@ -182,6 +365,96 @@ public final class ActivityMacroBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnShortcutF1;
+      Button btnShortcutF1 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF1 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF10;
+      Button btnShortcutF10 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF10 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF11;
+      Button btnShortcutF11 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF11 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF12;
+      Button btnShortcutF12 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF12 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF2;
+      Button btnShortcutF2 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF2 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF3;
+      Button btnShortcutF3 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF3 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF4;
+      Button btnShortcutF4 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF4 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF5;
+      Button btnShortcutF5 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF5 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF6;
+      Button btnShortcutF6 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF6 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF7;
+      Button btnShortcutF7 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF7 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF8;
+      Button btnShortcutF8 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF8 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutF9;
+      Button btnShortcutF9 = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutF9 == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutHome;
+      Button btnShortcutHome = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutHome == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutInsert;
+      Button btnShortcutInsert = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutInsert == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutLeft;
+      Button btnShortcutLeft = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutLeft == null) {
+        break missingId;
+      }
+
       id = R.id.btnShortcutMouseLClick;
       Button btnShortcutMouseLClick = ViewBindings.findChildViewById(rootView, id);
       if (btnShortcutMouseLClick == null) {
@@ -194,9 +467,27 @@ public final class ActivityMacroBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.btnShortcutMouseXY;
-      Button btnShortcutMouseXY = ViewBindings.findChildViewById(rootView, id);
-      if (btnShortcutMouseXY == null) {
+      id = R.id.btnShortcutPageDown;
+      Button btnShortcutPageDown = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutPageDown == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutPageUp;
+      Button btnShortcutPageUp = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutPageUp == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutRight;
+      Button btnShortcutRight = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutRight == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutSpace;
+      Button btnShortcutSpace = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutSpace == null) {
         break missingId;
       }
 
@@ -209,6 +500,48 @@ public final class ActivityMacroBinding implements ViewBinding {
       id = R.id.btnShortcutText;
       Button btnShortcutText = ViewBindings.findChildViewById(rootView, id);
       if (btnShortcutText == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutUp;
+      Button btnShortcutUp = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutUp == null) {
+        break missingId;
+      }
+
+      id = R.id.btnShortcutWinD;
+      Button btnShortcutWinD = ViewBindings.findChildViewById(rootView, id);
+      if (btnShortcutWinD == null) {
+        break missingId;
+      }
+
+      id = R.id.cbAlt;
+      CheckBox cbAlt = ViewBindings.findChildViewById(rootView, id);
+      if (cbAlt == null) {
+        break missingId;
+      }
+
+      id = R.id.cbCtrl;
+      CheckBox cbCtrl = ViewBindings.findChildViewById(rootView, id);
+      if (cbCtrl == null) {
+        break missingId;
+      }
+
+      id = R.id.cbShift;
+      CheckBox cbShift = ViewBindings.findChildViewById(rootView, id);
+      if (cbShift == null) {
+        break missingId;
+      }
+
+      id = R.id.cbWin;
+      CheckBox cbWin = ViewBindings.findChildViewById(rootView, id);
+      if (cbWin == null) {
+        break missingId;
+      }
+
+      id = R.id.etComboKey;
+      EditText etComboKey = ViewBindings.findChildViewById(rootView, id);
+      if (etComboKey == null) {
         break missingId;
       }
 
@@ -230,11 +563,17 @@ public final class ActivityMacroBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityMacroBinding((LinearLayout) rootView, btnCancel, btnSaveMacro,
-          btnShortcutAltTab, btnShortcutCtrlF, btnShortcutCtrlF4, btnShortcutCtrlTab,
-          btnShortcutDelay, btnShortcutEnter, btnShortcutEsc, btnShortcutMouseLClick,
-          btnShortcutMouseRClick, btnShortcutMouseXY, btnShortcutTab, btnShortcutText,
-          etMacroContent, etMacroName, lvMacros);
+      return new ActivityMacroBinding((ScrollView) rootView, btnAddCombo, btnCancel, btnSaveMacro,
+          btnShortcutAltF4, btnShortcutBackspace, btnShortcutCapsLock, btnShortcutCtrlC,
+          btnShortcutCtrlShiftEsc, btnShortcutCtrlV, btnShortcutCtrlZ, btnShortcutDelay,
+          btnShortcutDelete, btnShortcutDown, btnShortcutEnd, btnShortcutEnter, btnShortcutEsc,
+          btnShortcutF1, btnShortcutF10, btnShortcutF11, btnShortcutF12, btnShortcutF2,
+          btnShortcutF3, btnShortcutF4, btnShortcutF5, btnShortcutF6, btnShortcutF7, btnShortcutF8,
+          btnShortcutF9, btnShortcutHome, btnShortcutInsert, btnShortcutLeft,
+          btnShortcutMouseLClick, btnShortcutMouseRClick, btnShortcutPageDown, btnShortcutPageUp,
+          btnShortcutRight, btnShortcutSpace, btnShortcutTab, btnShortcutText, btnShortcutUp,
+          btnShortcutWinD, cbAlt, cbCtrl, cbShift, cbWin, etComboKey, etMacroContent, etMacroName,
+          lvMacros);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

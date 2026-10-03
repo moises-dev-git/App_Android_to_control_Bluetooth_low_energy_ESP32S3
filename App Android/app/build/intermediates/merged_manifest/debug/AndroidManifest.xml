@@ -37,15 +37,20 @@
         android:theme="@style/Theme.ESP32App" >
         <activity
             android:name="com.example.esp32app.MainActivity"
-            android:exported="true" >
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.esp32app.ControlActivity" />
-        <activity android:name="com.example.esp32app.MacroActivity" />
+        <activity
+            android:name="com.example.esp32app.ControlActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.example.esp32app.MacroActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

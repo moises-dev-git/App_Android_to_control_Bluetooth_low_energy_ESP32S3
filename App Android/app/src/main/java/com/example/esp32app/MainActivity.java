@@ -115,11 +115,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
             if (hasPermissions()) {
-                if (bluetoothLeScanner != null) {
-                    scanLeDevice();
-                } else {
-                    Toast.makeText(this, "Bluetooth não suportado ou desativado", Toast.LENGTH_SHORT).show();
-                }
+                scanLeDevice();
             } else {
                 requestPermissions();
             }
@@ -203,6 +199,28 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void scanLeDevice() {
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
+            bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        }
+
+        if (bluetoothLeScanner == null) {
+            Toast.makeText(this, "Bluetooth não ativado ou scanner BLE indisponível", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Verifica se a Localização (GPS) está ativada no celular
+        android.location.LocationManager locationManager = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean gpsEnabled = false;
+        if (locationManager != null) {
+            try {
+                gpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                             locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER);
+            } catch (Exception ignored) {}
+        }
+        if (!gpsEnabled) {
+            Toast.makeText(this, "Atenção: A Localização (GPS) precisa estar ativada no celular para descobrir dispositivos BLE!", Toast.LENGTH_LONG).show();
+        }
+
         if (!scanning) {
             // Limpa a lista antes de um novo Scan
             devicesAdapter.clear();
@@ -211,18 +229,33 @@ public class MainActivity extends AppCompatActivity {
             handler.postDelayed(() -> {
                 if (scanning) {
                     scanning = false;
-                    bluetoothLeScanner.stopScan(leScanCallback);
+                    try {
+                        bluetoothLeScanner.stopScan(leScanCallback);
+                    } catch (Exception ignored) {}
                     Toast.makeText(MainActivity.this, "Scan Encerrado após 10s", Toast.LENGTH_SHORT).show();
                 }
             }, SCAN_PERIOD);
 
             scanning = true;
-            bluetoothLeScanner.startScan(leScanCallback);
+
+            // Utiliza modo de baixa latência para scan ultra-rápido de dispositivos BLE
+            android.bluetooth.le.ScanSettings scanSettings = new android.bluetooth.le.ScanSettings.Builder()
+                    .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .build();
+
+            try {
+                bluetoothLeScanner.startScan(null, scanSettings, leScanCallback);
+            } catch (Exception e) {
+                bluetoothLeScanner.startScan(leScanCallback);
+            }
+
             Toast.makeText(MainActivity.this, "Scan Iniciado", Toast.LENGTH_SHORT).show();
         } else {
             scanning = false;
             handler.removeCallbacksAndMessages(null); // Cancela o timer de 10 segundos
-            bluetoothLeScanner.stopScan(leScanCallback);
+            try {
+                bluetoothLeScanner.stopScan(leScanCallback);
+            } catch (Exception ignored) {}
             Toast.makeText(MainActivity.this, "Scan Encerrado manualmente", Toast.LENGTH_SHORT).show();
         }
     }
