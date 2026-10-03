@@ -15,15 +15,15 @@ USBHIDKeyboard keyboard;
 USBHIDMouse Mouse;
 
 BLEServer *pServer = nullptr;
-BLECharacteristic *pTxCharacteristic = nullptr; // Objeto para enviar dados
+BLECharacteristic *pTxCharacteristic = nullptr; // Tx Characteristic for sending data
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) override {
-      Serial.println("Dispositivo Conectado!");
+      Serial.println("Device Connected!");
     }
 
     void onDisconnect(BLEServer* pServer) override {
-      Serial.println("Dispositivo Desconectado! Reiniciando advertising...");
+      Serial.println("Device Disconnected! Restarting advertising...");
       delay(300);
       BLEDevice::startAdvertising();
     }
@@ -67,12 +67,12 @@ void processKeyCombination(String comboStr) {
   comboStr.trim();
   if (comboStr.length() == 0) return;
 
-  // Substitui underlines por '+' se formato legado for usado (ex: CTRL_F4 -> CTRL+F4)
+  // Replace underscores with '+' for legacy formats (e.g. CTRL_F4 -> CTRL+F4)
   if (comboStr.indexOf('+') == -1 && comboStr.indexOf('_') != -1) {
     comboStr.replace('_', '+');
   }
 
-  // Garante liberação de teclas anteriores antes de iniciar nova combinação
+  // Ensure previous keys are released before starting a new combination
   keyboard.releaseAll();
   delay(10);
 
@@ -107,8 +107,8 @@ void processKeyCombination(String comboStr) {
         pressedAny = true;
       } else if (part.length() == 1 || partUpper.length() == 1) {
         char c = (part.length() == 1) ? part[0] : partUpper[0];
-        // Converte letras maiúsculas (A-Z) para minúsculas (a-z) ao simular o código físico da tecla.
-        // Isso impede que a biblioteca USBHID insira a tecla SHIFT automaticamente quando a letra for maiúscula.
+        // Convert uppercase (A-Z) to lowercase (a-z) when simulating physical scancodes.
+        // This prevents USBHID library from automatically injecting SHIFT for capital letters.
         if (c >= 'A' && c <= 'Z') {
           c = c + ('a' - 'A');
         }
@@ -122,7 +122,7 @@ void processKeyCombination(String comboStr) {
   }
 
   if (pressedAny) {
-    delay(120); // Retardo de sustentação essencial para o SO (Windows/Linux) registrar o atalho USB HID
+    delay(120); // Essential key hold delay for host OS (Windows/Linux) to register USB HID shortcut
   }
   keyboard.releaseAll();
   delay(20);
@@ -132,7 +132,7 @@ void processSingleCommand(String cmd) {
   cmd.trim();
   if (cmd.length() == 0) return;
 
-  // Limpa prefixos redundantes caso venham no comando
+  // Clean redundant prefixes if present in command
   while (cmd.startsWith("CMD:") || cmd.startsWith("KEY:") || cmd.startsWith("COMBO:")) {
     if (cmd.startsWith("CMD:")) cmd = cmd.substring(4);
     else if (cmd.startsWith("KEY:")) cmd = cmd.substring(4);
@@ -172,7 +172,7 @@ void processSingleCommand(String cmd) {
     int d = cmd.substring(6).toInt();
     if (d > 0 && d <= 10000) delay(d);
   } else {
-    // É uma combinação de teclas (ex: CTRL+F4) ou tecla individual (ex: TAB, ENTER, ESC)
+    // Key combination (e.g. CTRL+F4) or individual key (e.g. TAB, ENTER, ESC)
     processKeyCombination(cmd);
   }
 }
@@ -182,7 +182,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       String rxValue = pCharacteristic->getValue();
 
       if (rxValue.length() > 0) {
-        Serial.print("Recebido: ");
+        Serial.print("Received: ");
         Serial.println(rxValue);
 
         if (rxValue.startsWith("TXT:")) {
@@ -209,12 +209,12 @@ class MyCallbacks: public BLECharacteristicCallbacks {
           }
         }
 
-        // --- ENVIAR RESPOSTA PARA O CELULAR ---
+        // --- SEND RESPONSE TO MOBILE APP ---
         if (pTxCharacteristic != nullptr) {
-          String resposta = "OK! Recebi: " + rxValue;
+          String resposta = "OK! Received: " + rxValue;
           pTxCharacteristic->setValue(resposta.c_str());
           pTxCharacteristic->notify();
-          Serial.println("Resposta enviada ao app.");
+          Serial.println("Response sent to mobile app.");
         }
       }
     }
@@ -224,7 +224,7 @@ void setup() {
   Serial.begin(115200);
 
   USB.productName("Mouse USB HID");
-  USB.manufacturerName("Dispositivo HID");
+  USB.manufacturerName("HID Device");
   keyboard.begin();
   Mouse.begin();
   USB.begin();
@@ -235,14 +235,14 @@ void setup() {
   pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
-  // Característica de TX (Notificação com descritor BLE2902 obrigatório para Android)
+  // TX Characteristic (Notification with BLE2902 descriptor required by Android)
   pTxCharacteristic = pService->createCharacteristic(
                         CHARACTERISTIC_UUID_TX,
                         BLECharacteristic::PROPERTY_NOTIFY
                       );
   pTxCharacteristic->addDescriptor(new BLE2902());
 
-  // Característica de RX (Escrita do celular)
+  // RX Characteristic (Write from mobile app)
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
                                            CHARACTERISTIC_UUID_RX,
                                            BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR
@@ -254,12 +254,12 @@ void setup() {
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
   pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06); // Parâmetros recomendados para compatibilidade Android/iOS
+  pAdvertising->setMinPreferred(0x06); // Recommended parameters for Android/iOS compatibility
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  Serial.println("BLE Advertising (Bluedroid) iniciado para o serviço: " SERVICE_UUID);
-  Serial.println("Pronto! Conecte no nRF Connect ou App Android.");
+  Serial.println("BLE Advertising (Bluedroid) started for service: " SERVICE_UUID);
+  Serial.println("Ready! Connect via nRF Connect or Android App.");
 }
 
 unsigned long lastTempUpdate = 0;
@@ -268,7 +268,7 @@ void loop() {
   if (millis() - lastTempUpdate > 5000) {
     lastTempUpdate = millis();
     float temp_celsius = temperatureRead();
-    Serial.print("Temperatura interna do chip: ");
+    Serial.print("Internal Chip Temperature: ");
     Serial.println(temp_celsius);
 
     if (pServer != nullptr && pServer->getConnectedCount() > 0 && pTxCharacteristic != nullptr) {
