@@ -11,8 +11,8 @@ This repository contains a complete end-to-end solution for remotely controlling
 - **Native USB Keyboard & Mouse Emulation:** The ESP32-S3 acts as a physical USB keyboard and mouse (`Mouse USB HID`).
 - **Dynamic Key Combinations:** Supports any key combo (`CTRL+SHIFT+ESC`, `ALT+F4`, `WIN+R`, `CTRL+ALT+DEL`, `WIN+D`, etc.), case-insensitive.
 - **Special Keys Mapping:** Full support for `ENTER`, `ESC`, `TAB`, `DEL`/`DELETE`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `CAPSLOCK`, directional arrows, and function keys `F1` through `F12`.
-- **Mouse Movement & Clicking:** Relative pointer control (`dx`, `dy`) and left/right clicks.
-- **Sequential Macro Execution (`SEQ:`):** Automated routines with delays (`DELAY:ms`), text typing, and key shortcuts.
+- **Mouse Movement & Clicking:** Mouse pointer positioning with **Direct** (`MOVE:x,y`) or **Humanized** (`MOVE_HUMAN:x,y,speed`) mode using Quadratic Bézier curves and natural Ease-In-Out acceleration/deceleration, plus adjustable speed (1-10) and clicks.
+- **Sequential Macro Execution (`SEQ:`):** Automated routines with human/direct pointer positioning, delays (`DELAY:ms`), text typing, and key shortcuts.
 - **Categorized Key Carousel in Android:** Category-based horizontal carousel interface in the Android app for easy key selection.
 
 ---

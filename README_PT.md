@@ -11,8 +11,8 @@ Este projeto consiste em uma solução completa para controle remoto de um compu
 - **Emulação de Teclado e Mouse USB:** O ESP32-S3 se comporta como teclado e mouse físicos USB (`Mouse USB HID`).
 - **Combinações Dinâmicas de Teclas:** Suporte a qualquer combinação (`CTRL+SHIFT+ESC`, `ALT+F4`, `WIN+R`, `CTRL+ALT+DEL`, `WIN+D`, etc.), aceitando maiúsculas e minúsculas.
 - **Mapeamento de Teclas Especiais:** Suporta `ENTER`, `ESC`, `TAB`, `DEL`/`DELETE`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `CAPSLOCK`, setas direcionais e teclas de função `F1` a `F12`.
-- **Movimento e Clique de Mouse:** Controle relativo de ponteiro (`dx`, `dy`) e cliques esquerdo/direito.
-- **Execução de Macros Sequenciais (`SEQ:`):** Executa rotinas automáticas com atrasos (`DELAY:ms`), digitação de texto e atalhos.
+- **Movimento e Clique de Mouse:** Posicionamento de ponteiro com opção **Direta** (`MOVE:x,y`) ou **Humanizada** (`MOVE_HUMAN:x,y,speed`) com Curvas de Bézier e aceleração/desaceleração natural (Ease-In-Out), além de controle de velocidade (1-10) e cliques.
+- **Execução de Macros Sequenciais (`SEQ:`):** Executa rotinas automáticas com posicionamento de ponteiro humano/direto, atrasos (`DELAY:ms`), digitação de texto e atalhos.
 - **Carrossel por Categorias no Android:** Interface do app com rolagem lateral organizada em 5 categorias para seleção de teclas.
 
 ---

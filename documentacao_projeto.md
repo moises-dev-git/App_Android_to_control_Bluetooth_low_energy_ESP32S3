@@ -82,6 +82,26 @@ A tela de Gerenciador de Macros foi construída utilizando **Carrosséis Horizon
 | `CMD:CHROME` | `CMD:CHROME` | Pressiona `Win + r`, digita "chrome" e aperta `Enter`. |
 | `CMD:MOUSE_LCLICK` | `CMD:MOUSE_LCLICK` | Clique com o botão esquerdo do mouse. |
 | `CMD:MOUSE_RCLICK` | `CMD:MOUSE_RCLICK` | Clique com o botão direito do mouse. |
-| `CMD:MOUSE:dx,dy` | `CMD:MOUSE:10,-20` | Move o cursor do mouse relativamente (x, y). |
+| `CMD:MOVE:x,y` | `CMD:MOVE:500,300` | Movimento Direto: reseta para (0,0) e move em linha reta até (x, y). |
+| `CMD:MOVE_HUMAN:x,y,speed` | `CMD:MOVE_HUMAN:500,300,5` | Movimento Humanizado: reseta suavemente para (0,0) e descreve uma Curva de Bézier com desaceleração e velocidade customizável (1-10). |
 | `CMD:KEY:combinação` | `CMD:KEY:CTRL+SHIFT+ESC` | Pressiona a combinação dinâmica de teclas. |
-| `SEQ:linhas` | `SEQ:ALT+F4\nDELAY:500\nENTER` | Executa uma sequência de comandos linha a linha (Macro). |
+| `SEQ:linhas` | `SEQ:MOVE_HUMAN:500,300,5\nDELAY:500\nENTER` | Executa uma sequência de comandos linha a linha (Macro). |
+
+---
+
+## 7. Suporte a Acentuação em Português (UTF-8 & Teclados ABNT2 / Linux / Windows)
+
+Para permitir a digitação perfeita de caracteres acentuados (`ã`, `Ã`, `ç`, `Ç`, `á`, `é`, `í`, `ó`, `ú`, `â`, `ê`, `ô`, `à`, `õ`), o firmware inclui um decodificador UTF-8 (`sendTextUTF8`) e um mapeador de acentos ABNT2 (`sendABNT2Accent`):
+
+* **Decodificação UTF-8:** Intercepta caracteres de 2 bytes (ex: `ã` = `0xC3 0xA3`) e extrai o código Unicode decimal.
+* **Mapeamento ABNT2 Físico (Modo 0 - Padrão):** Mapeia os acentos para as posições físicas das teclas do teclado Português (Brasil ABNT2):
+  * **Agudo (`´`):** Envia a tecla física `[` $\rightarrow$ gera `ó`, `á`, `é`, `í`, `ú`.
+  * **Til (`~`):** Envia a tecla física `'` $\rightarrow$ gera `ã`, `Ã`, `õ`, `Õ`.
+  * **Circunflexo (`^`):** Envia a tecla física `"` $\rightarrow$ gera `â`, `ê`, `ô`.
+  * **Crase (`` ` ``):** Envia a tecla física `{` $\rightarrow$ gera `à`.
+  * **Cedilha (`ç` / `Ç`):** Envia as teclas físicas `;` / `:` $\rightarrow$ gera `ç` / `Ç`.
+* **Modos Alternativos de Acentuação:**
+  * `CMD:ACCENT_DEADKEY` (ou `CMD:ACCENT:0`): Modo Teclas Mortas ABNT2 (Padrão para Linux Mint e Windows ABNT2).
+  * `CMD:ACCENT_LINUX` (ou `CMD:ACCENT:1`): Modo Linux GTK Unicode (`Ctrl+Shift+U` + hex + `Enter`).
+  * `CMD:ACCENT_ALTCODE` (ou `CMD:ACCENT:2`): Modo Windows Alt Codes (`Alt` + Numpad `0XXX`).
+

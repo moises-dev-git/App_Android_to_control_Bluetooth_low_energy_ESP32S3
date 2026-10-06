@@ -82,6 +82,7 @@ The Macro Manager screen features **Horizontal ScrollViews** organized into 5 cl
 | `CMD:CHROME` | `CMD:CHROME` | Presses `Win + r`, types "chrome", and presses `Enter`. |
 | `CMD:MOUSE_LCLICK` | `CMD:MOUSE_LCLICK` | Mouse left click. |
 | `CMD:MOUSE_RCLICK` | `CMD:MOUSE_RCLICK` | Mouse right click. |
-| `CMD:MOUSE:dx,dy` | `CMD:MOUSE:10,-20` | Moves mouse cursor relatively (x, y). |
+| `CMD:MOVE:x,y` | `CMD:MOVE:500,300` | Direct Movement: resets to (0,0) and moves straight to (x, y). |
+| `CMD:MOVE_HUMAN:x,y,speed` | `CMD:MOVE_HUMAN:500,300,5` | Humanized Movement: smoothly resets to (0,0) and traces a Quadratic Bézier curve with Ease-In-Out acceleration and configurable speed (1-10). |
 | `CMD:KEY:combo` | `CMD:KEY:CTRL+SHIFT+ESC` | Presses dynamic key combination. |
-| `SEQ:lines` | `SEQ:ALT+F4\nDELAY:500\nENTER` | Executes multi-line macro sequence. |
+| `SEQ:lines` | `SEQ:MOVE_HUMAN:500,300,5\nDELAY:500\nENTER` | Executes multi-line macro sequence. |

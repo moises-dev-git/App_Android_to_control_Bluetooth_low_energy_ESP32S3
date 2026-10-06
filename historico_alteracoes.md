@@ -22,8 +22,17 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
   - A função `processKeyCombination()` converte automaticamente qualquer letra de `'A'-'Z'` para `'a'-'z'` ao simular o scancode físico, impedindo que a biblioteca `USBHIDKeyboard` injete o `SHIFT` automaticamente em maiúsculas.
 * **Suporte Total a Teclas Especiais (`parseSpecialKey`):**
   - Mapeadas teclas `ENTER`, `ESC`, `TAB`, `DEL`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `UP`, `DOWN`, `LEFT`, `RIGHT`, `SPACE`, `CAPSLOCK` e `F1` até `F12`.
+* **Suporte a Movimentação Direta e Humanizada do Ponteiro do Mouse (`MOVE:x,y` e `MOVE_HUMAN:x,y,speed`):**
+  - Implementada a função `moveMouseTo(targetX, targetY, speed, isHuman)`.
+  - **Modo Direto (`MOVE:x,y`):** Reseta para (0,0) em alta velocidade e move em passos retos.
+  - **Modo Humanizado (`MOVE_HUMAN:x,y,speed` ou `MOVE:x,y,speed,1`):** Reseta com curva/desaceleração até (0,0) e descreve uma **Curva de Bézier Quadrática** até `(x, y)` com algoritmo de aceleração/desaceleração natural (**Ease-In-Out**). Permite definir a velocidade de 1 (lento) a 10 (rápido).
 * **Resolução do Problema de Descoberta Bluetooth no Android:**
   - Uso da biblioteca oficial Espressif `BLEDevice.h` (Bluedroid), inclusão do descritor `BLE2902` (CCCD) e proteção contra crash loop no `loop()`.
+* **Suporte Universal a Caracteres Acentuados no Linux Mint e Windows (`sendTextUTF8`):**
+  - Implementados 3 Modos de Acentuação comutáveis em tempo de execução via comandos `CMD:ACCENT_DEADKEY`, `CMD:ACCENT_LINUX` ou `CMD:ACCENT_ALTCODE`:
+    1. **Modo 0 (Dead Keys - Padrão):** Simula teclas mortas (`~` + `a` $\rightarrow$ `ã`, `'` + `a` $\rightarrow$ `á`, `'` + `c` $\rightarrow$ `ç`). Funciona perfeitamente no Linux Mint e Windows em teclados ABNT2 e US-International.
+    2. **Modo 1 (Linux GTK Unicode):** Envia o atalho nativo do Linux Mint (`Ctrl+Shift+U` + Código Hex + `Enter`). Funciona no Linux Mint com **qualquer** layout de teclado configurado.
+    3. **Modo 2 (Windows Alt Code):** Envia a combinação `Alt` + Teclado Numérico `0XXX` para sistemas Windows.
 
 ---
 
@@ -35,9 +44,13 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
     2. 🎹 **Edição & Controle:** `Enter`, `Tab`, `Esc`, `Space`, `Backspace`, `Delete`, `Insert`, `Home`, `End`, `PageUp`, `PageDown`.
     3. 🎯 **Navegação & Setas:** `↑ Up`, `↓ Down`, `← Left`, `→ Right`, `Caps Lock`.
     4. 🛠️ **Teclas F1 a F12:** `F1`, `F2`, `F3`, `F4`, `F5`, `F6`, `F7`, `F8`, `F9`, `F10`, `F11`, `F12`.
-    5. 🖱️ **Ações & Comandos:** `TEXT:`, `DELAY:500`, `Click Esq.`, `Click Dir.`.
+    5. 🖱️ **Ações & Comandos:** `TEXT:`, `DELAY:500`, `Move Direto`, `Move Humano`, `Click Esq.`, `Click Dir.`.
 * **Expansão de MTU de 512 Bytes ([`ControlActivity.java`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.java)):** Solicita `requestMtu(512)` ao conectar.
 * **Varredura BLE Ultra-Rápida e Alerta de GPS ([`MainActivity.java`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MainActivity.java)).**
+* **Navegação e Rolagem Suave na Caixa de Texto de Macros ([`MacroActivity.java`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MacroActivity.java) / [`activity_macro.xml`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/res/layout/activity_macro.xml)):**
+  - Implementada intercepção de gestos de toque (`requestDisallowInterceptTouchEvent(true)`), permitindo deslizar o dedo na caixa de texto para rolar a macro de forma direta e fluida, **sem precisar abrir o teclado ou arrastar a agulha do cursor**.
+  - Adicionada barra de rolagem vertical visível contínua (`android:scrollbars="vertical"`).
+  - Incluídos botões de navegação rápida **`⬆️ Topo`** e **`⬇️ Fim`** no cabeçalho do campo para salto instantâneo no início ou fim de macros longas.
 
 ---
 

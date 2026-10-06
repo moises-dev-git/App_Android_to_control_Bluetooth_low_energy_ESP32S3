@@ -16,6 +16,10 @@ This document records the full history of modifications made to the **ESP32-S3 B
   - **Fix:** `processKeyCombination()` automatically converts `'A'-'Z'` to `'a'-'z'` scancodes before calling `keyboard.press()`.
 * **Full Special Keys Support (`parseSpecialKey`):**
   - Mapped `ENTER`, `ESC`, `TAB`, `DEL`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `UP`, `DOWN`, `LEFT`, `RIGHT`, `SPACE`, `CAPSLOCK`, and `F1` through `F12`.
+* **Direct and Humanized Mouse Pointer Movement (`MOVE:x,y` and `MOVE_HUMAN:x,y,speed`):**
+  - Updated `moveMouseTo(targetX, targetY, speed, isHuman)` helper function.
+  - **Direct Mode (`MOVE:x,y`):** Fast straight movement after quick top-left reset.
+  - **Humanized Mode (`MOVE_HUMAN:x,y,speed` or `MOVE:x,y,speed,1`):** Smooth reset to (0,0) with deceleration, followed by a **Quadratic Bézier Curve** to `(x, y)` with natural **Ease-In-Out** acceleration/deceleration. Configurable speed parameter (1 = slow/smooth to 10 = fast flick).
 * **BLE Discovery Resolution on Android:**
   - Migrated to Espressif's official `BLEDevice.h` (Bluedroid) stack.
   - Added mandatory `BLE2902` (CCCD) descriptor (`pTxCharacteristic->addDescriptor(new BLE2902())`).
@@ -26,7 +30,7 @@ This document records the full history of modifications made to the **ESP32-S3 B
 ### 2. Android Application
 
 * **Categorized Horizontal Carousel in `MacroActivity`:**
-  - Implemented category-based horizontal scroll views for all special keys (Shortcuts, Editing & Control, Navigation & Arrows, Function Keys F1-F12, and Mouse Actions).
+  - Implemented category-based horizontal scroll views for all special keys (Shortcuts, Editing & Control, Navigation & Arrows, Function Keys F1-F12, and Mouse Actions including `Move Direto` and `Move Humano`).
 * **512-Byte MTU Expansion ([`ControlActivity.java`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.java)):**
   - Requests `requestMtu(512)` upon connection, preventing Android's default 20-byte payload truncation on long macros.
 * **Low-Latency BLE Scanning & GPS Check ([`MainActivity.java`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MainActivity.java)):**

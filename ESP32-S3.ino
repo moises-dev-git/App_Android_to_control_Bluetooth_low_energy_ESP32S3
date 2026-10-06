@@ -128,13 +128,242 @@ void processKeyCombination(String comboStr) {
   delay(20);
 }
 
+void moveMouseTo(int targetX, int targetY, int speed = 5, bool isHuman = false) {
+  if (targetX < 0) targetX = 0;
+  if (targetY < 0) targetY = 0;
+
+  // Limita velocidade entre 1 (lento) e 10 (rápido)
+  if (speed < 1) speed = 1;
+  if (speed > 10) speed = 10;
+
+  if (!isHuman) {
+    // --- MODO DIRETO / RÁPIDO ---
+    // 1. Reseta para o canto superior esquerdo (0,0)
+    for (int i = 0; i < 60; i++) {
+      Mouse.move(-127, -127);
+      delay(2);
+    }
+
+    // 2. Move em passos retos de 127
+    while (targetX > 0 || targetY > 0) {
+      int stepX = (targetX > 127) ? 127 : targetX;
+      int stepY = (targetY > 127) ? 127 : targetY;
+      Mouse.move(stepX, stepY);
+      targetX -= stepX;
+      targetY -= stepY;
+      delay(2);
+    }
+    return;
+  }
+
+  // --- MODO HUMANIZADO (Curva de Bézier + Ease-In-Out) ---
+  // speed 1 (lento): 120 passos, delay 8ms
+  // speed 5 (normal): 60 passos, delay 4ms
+  // speed 10 (rápido): 25 passos, delay 2ms
+  int steps = map(speed, 1, 10, 120, 25);
+  int stepDelay = map(speed, 1, 10, 8, 2);
+
+  // 1. Zerar posição (0,0) com desaceleração suave
+  for (int i = 0; i < steps; i++) {
+    float u = (float)i / (float)steps;
+    float ease = u * u * (3.0f - 2.0f * u);
+    int dx = (int)(-127.0f * (1.0f - ease * 0.3f));
+    int dy = (int)(-127.0f * (1.0f - ease * 0.3f));
+    if (dx < -127) dx = -127;
+    if (dy < -127) dy = -127;
+    Mouse.move(dx, dy);
+    delay(stepDelay);
+  }
+  // Garantia de colisão com canto superior esquerdo (0,0)
+  for (int i = 0; i < 10; i++) {
+    Mouse.move(-127, -127);
+    delay(1);
+  }
+
+  if (targetX == 0 && targetY == 0) return;
+
+  // 2. Mover de (0,0) para (targetX, targetY) usando Curva de Bézier Quadrática
+  // P0 = (0, 0), P2 = (targetX, targetY)
+  // P1 = Ponto de controle criando o arco de movimento humano natural
+  float p1X = (float)targetX * 0.5f - (float)targetY * 0.15f;
+  float p1Y = (float)targetY * 0.5f + (float)targetX * 0.15f;
+
+  int lastX = 0;
+  int lastY = 0;
+
+  for (int i = 1; i <= steps; i++) {
+    float u = (float)i / (float)steps;
+    // Ease-In-Out (Smoothstep): aceleração suave no início e desaceleração na chegada
+    float t = u * u * (3.0f - 2.0f * u);
+
+    // Curva de Bézier: B(t) = (1-t)^2 * P0 + 2*(1-t)*t * P1 + t^2 * P2
+    float invT = 1.0f - t;
+    float currX = 2.0f * invT * t * p1X + t * t * (float)targetX;
+    float currY = 2.0f * invT * t * p1Y + t * t * (float)targetY;
+
+    int roundedX = (i == steps) ? targetX : (int)round(currX);
+    int roundedY = (i == steps) ? targetY : (int)round(currY);
+
+    int dx = roundedX - lastX;
+    int dy = roundedY - lastY;
+
+    while (dx != 0 || dy != 0) {
+      int subDx = (dx > 127) ? 127 : ((dx < -127) ? -127 : dx);
+      int subDy = (dy > 127) ? 127 : ((dy < -127) ? -127 : dy);
+
+      Mouse.move(subDx, subDy);
+      dx -= subDx;
+      dy -= subDy;
+      if (dx != 0 || dy != 0) delay(1);
+    }
+
+    lastX = roundedX;
+    lastY = roundedY;
+
+    delay(stepDelay);
+  }
+}
+
+// Modo de Acentuação:
+// 0 = Teclas Mortas / Dead Keys (Recomendado para Linux Mint & Windows com ABNT2 / US-Intl)
+// 1 = Linux GTK Unicode (Ctrl+Shift+U + Hex + Enter -> Funciona no Linux Mint com QUALQUER teclado)
+// 2 = Windows Alt Codes (Alt + 0XXX no teclado numérico)
+int accentMode = 0;
+
+void sendDeadKeyAccent(char accent, char letter) {
+  keyboard.write(accent);
+  delay(15);
+  keyboard.write(letter);
+  delay(15);
+}
+
+void sendLinuxUnicode(uint16_t unicode) {
+  keyboard.press(KEY_LEFT_CTRL);
+  keyboard.press(KEY_LEFT_SHIFT);
+  keyboard.press('u');
+  delay(20);
+  keyboard.releaseAll();
+  delay(15);
+
+  char hexBuf[5];
+  snprintf(hexBuf, sizeof(hexBuf), "%x", unicode);
+  for (int j = 0; hexBuf[j] != '\0'; j++) {
+    keyboard.write(hexBuf[j]);
+    delay(5);
+  }
+  delay(10);
+  keyboard.write(KEY_RETURN);
+  delay(15);
+}
+
+void sendAltCode(uint16_t code) {
+  keyboard.press(KEY_LEFT_ALT);
+  delay(10);
+
+  char digits[5];
+  snprintf(digits, sizeof(digits), "%04u", code);
+
+  for (int i = 0; i < 4; i++) {
+    uint8_t kp_key = KEY_KP_0;
+    if (digits[i] >= '1' && digits[i] <= '9') {
+      kp_key = KEY_KP_1 + (digits[i] - '1');
+    }
+    keyboard.press(kp_key);
+    delay(6);
+    keyboard.release(kp_key);
+    delay(6);
+  }
+
+  keyboard.release(KEY_LEFT_ALT);
+  delay(10);
+}
+
+void sendABNT2Accent(uint16_t unicode) {
+  switch (unicode) {
+    // --- TIL (~) -> Tecla física '\'' no US HID ---
+    case 227: sendDeadKeyAccent('\'', 'a'); break; // ã
+    case 195: sendDeadKeyAccent('\'', 'A'); break; // Ã
+    case 245: sendDeadKeyAccent('\'', 'o'); break; // õ
+    case 213: sendDeadKeyAccent('\'', 'O'); break; // Õ
+    case 241: sendDeadKeyAccent('\'', 'n'); break; // ñ
+    case 209: sendDeadKeyAccent('\'', 'N'); break; // Ñ
+
+    // --- AGUDO (´) -> Tecla física '[' no US HID ---
+    case 225: sendDeadKeyAccent('[', 'a'); break; // á
+    case 193: sendDeadKeyAccent('[', 'A'); break; // Á
+    case 233: sendDeadKeyAccent('[', 'e'); break; // é
+    case 201: sendDeadKeyAccent('[', 'E'); break; // É
+    case 237: sendDeadKeyAccent('[', 'i'); break; // í
+    case 205: sendDeadKeyAccent('[', 'I'); break; // Í
+    case 243: sendDeadKeyAccent('[', 'o'); break; // ó
+    case 211: sendDeadKeyAccent('[', 'O'); break; // Ó
+    case 250: sendDeadKeyAccent('[', 'u'); break; // ú
+    case 218: sendDeadKeyAccent('[', 'U'); break; // Ú
+
+    // --- CIRCUNFLEXO (^) -> Tecla física '"' (Shift + '\'') no US HID ---
+    case 226: sendDeadKeyAccent('"', 'a'); break; // â
+    case 194: sendDeadKeyAccent('"', 'A'); break; // Â
+    case 234: sendDeadKeyAccent('"', 'e'); break; // ê
+    case 202: sendDeadKeyAccent('"', 'E'); break; // Ê
+    case 244: sendDeadKeyAccent('"', 'o'); break; // ô
+    case 212: sendDeadKeyAccent('"', 'O'); break; // Ô
+
+    // --- CRASE (`) -> Tecla física '{' (Shift + '[') no US HID ---
+    case 224: sendDeadKeyAccent('{', 'a'); break; // à
+    case 192: sendDeadKeyAccent('{', 'A'); break; // À
+
+    // --- CEDILHA (ç) -> Tecla física ';' no US HID ---
+    case 231: keyboard.write(';'); break; // ç
+    case 199: keyboard.write(':'); break; // Ç
+
+    default:
+      sendLinuxUnicode(unicode);
+      break;
+  }
+}
+
+void sendTextUTF8(String text) {
+  int len = text.length();
+  int i = 0;
+  while (i < len) {
+    uint8_t c = (uint8_t)text[i];
+    if (c < 128) {
+      // Caractere ASCII padrão (0-127)
+      keyboard.write(c);
+      i++;
+    } else if ((c & 0xE0) == 0xC0 && i + 1 < len) {
+      // Sequência UTF-8 de 2 bytes (Acentos: ã, Ã, ç, Ç, á, é, í, ó, ú, â, ê, ô, à, õ, etc.)
+      uint8_t c2 = (uint8_t)text[i + 1];
+      uint16_t unicode = ((c & 0x1F) << 6) | (c2 & 0x3F);
+
+      if (accentMode == 0) {
+        // --- MODO 0: DEAD KEYS ABNT2 (Teclado Português do Brasil) ---
+        sendABNT2Accent(unicode);
+      } else if (accentMode == 1) {
+        // --- MODO 1: LINUX UNICODE (Ctrl+Shift+U) ---
+        sendLinuxUnicode(unicode);
+      } else {
+        // --- MODO 2: WINDOWS ALT CODE ---
+        sendAltCode(unicode);
+      }
+      i += 2;
+    } else if ((c & 0xF0) == 0xE0 && i + 2 < len) {
+      i += 3;
+    } else if ((c & 0xF8) == 0xF0 && i + 3 < len) {
+      i += 4;
+    } else {
+      i++;
+    }
+  }
+}
+
 void processSingleCommand(String cmd) {
   cmd.trim();
   if (cmd.length() == 0) return;
 
   // Clean redundant prefixes if present in command
   while (cmd.startsWith("CMD:") || cmd.startsWith("KEY:") || cmd.startsWith("COMBO:")) {
-    if (cmd.startsWith("CMD:")) cmd = cmd.substring(4);
+    if (cmd.startsWith("CMD:") ) cmd = cmd.substring(4);
     else if (cmd.startsWith("KEY:")) cmd = cmd.substring(4);
     else if (cmd.startsWith("COMBO:")) cmd = cmd.substring(6);
     cmd.trim();
@@ -142,7 +371,15 @@ void processSingleCommand(String cmd) {
 
   if (cmd.length() == 0) return;
 
-  if (cmd == "MOUSE_CLICK" || cmd == "MOUSE_LCLICK") {
+  if (cmd.startsWith("ACCENT:")) {
+    accentMode = cmd.substring(7).toInt();
+  } else if (cmd == "ACCENT_DEADKEY") {
+    accentMode = 0;
+  } else if (cmd == "ACCENT_LINUX") {
+    accentMode = 1;
+  } else if (cmd == "ACCENT_ALTCODE") {
+    accentMode = 2;
+  } else if (cmd == "MOUSE_CLICK" || cmd == "MOUSE_LCLICK") {
     Mouse.click(MOUSE_LEFT);
   } else if (cmd == "MOUSE_RCLICK") {
     Mouse.click(MOUSE_RIGHT);
@@ -158,16 +395,38 @@ void processSingleCommand(String cmd) {
     keyboard.write(KEY_RETURN);
     delay(50);
     keyboard.releaseAll();
-  } else if (cmd.startsWith("MOUSE:")) {
-    int commaIndex = cmd.indexOf(',', 6);
-    if (commaIndex != -1) {
-      int dx = cmd.substring(6, commaIndex).toInt();
-      int dy = cmd.substring(commaIndex + 1).toInt();
-      Mouse.move(dx, dy);
+  } else if (cmd.startsWith("MOVE:") || cmd.startsWith("MOVE_HUMAN:") || cmd.startsWith("HUMAN_MOVE:") ||
+             cmd.startsWith("MOVE_TO:") || cmd.startsWith("MOVE_ABS:") || cmd.startsWith("MOUSE_MOVE:") || cmd.startsWith("MOUSE:")) {
+    bool isHuman = (cmd.startsWith("MOVE_HUMAN:") || cmd.startsWith("HUMAN_MOVE:"));
+    int colonIndex = cmd.indexOf(':');
+    String paramsStr = cmd.substring(colonIndex + 1);
+    paramsStr.trim();
+
+    int targetX = 0, targetY = 0, speed = 5;
+
+    int c1 = paramsStr.indexOf(',');
+    if (c1 != -1) {
+      targetX = paramsStr.substring(0, c1).toInt();
+      int c2 = paramsStr.indexOf(',', c1 + 1);
+      if (c2 == -1) {
+        targetY = paramsStr.substring(c1 + 1).toInt();
+      } else {
+        targetY = paramsStr.substring(c1 + 1, c2).toInt();
+        int c3 = paramsStr.indexOf(',', c2 + 1);
+        if (c3 == -1) {
+          speed = paramsStr.substring(c2 + 1).toInt();
+          isHuman = true;
+        } else {
+          speed = paramsStr.substring(c2 + 1, c3).toInt();
+          int mode = paramsStr.substring(c3 + 1).toInt();
+          isHuman = (mode != 0);
+        }
+      }
+      moveMouseTo(targetX, targetY, speed, isHuman);
     }
   } else if (cmd.startsWith("TEXT:") || cmd.startsWith("TXT:")) {
     int prefixLen = cmd.startsWith("TEXT:") ? 5 : 4;
-    keyboard.print(cmd.substring(prefixLen));
+    sendTextUTF8(cmd.substring(prefixLen));
   } else if (cmd.startsWith("DELAY:")) {
     int d = cmd.substring(6).toInt();
     if (d > 0 && d <= 10000) delay(d);
@@ -187,7 +446,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
         if (rxValue.startsWith("TXT:")) {
           String text = rxValue.substring(4);
-          keyboard.print(text);
+          sendTextUTF8(text);
         } else if (rxValue.startsWith("CMD:")) {
           String cmd = rxValue.substring(4);
           processSingleCommand(cmd);

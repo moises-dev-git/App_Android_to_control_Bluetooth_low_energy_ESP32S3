@@ -43,6 +43,32 @@ public class MacroActivity extends AppCompatActivity {
 
         btnAddCombo.setOnClickListener(v -> addCustomCombo());
 
+        // Habilita rolagem suave interna no EditText de conteúdo da Macro
+        etMacroContent.setMovementMethod(new android.text.method.ScrollingMovementMethod());
+        etMacroContent.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            if ((event.getAction() & android.view.MotionEvent.ACTION_MASK) == android.view.MotionEvent.ACTION_UP) {
+                v.getParent().requestDisallowInterceptTouchEvent(false);
+            }
+            return false;
+        });
+
+        // Botões de Navegação Rápida (Topo e Fim)
+        findViewById(R.id.btnScrollTop).setOnClickListener(v -> {
+            etMacroContent.setSelection(0);
+            etMacroContent.scrollTo(0, 0);
+        });
+
+        findViewById(R.id.btnScrollBottom).setOnClickListener(v -> {
+            if (etMacroContent.getText().length() > 0) {
+                etMacroContent.setSelection(etMacroContent.getText().length());
+                if (etMacroContent.getLayout() != null) {
+                    int scrollY = etMacroContent.getLayout().getLineTop(etMacroContent.getLineCount()) - etMacroContent.getHeight();
+                    etMacroContent.scrollTo(0, Math.max(0, scrollY));
+                }
+            }
+        });
+
         setupShortcutButtons();
         loadMacros();
     }
@@ -93,7 +119,7 @@ public class MacroActivity extends AppCompatActivity {
                 R.id.btnShortcutF9, R.id.btnShortcutF10, R.id.btnShortcutF11, R.id.btnShortcutF12,
 
                 // Ações & Comandos
-                R.id.btnShortcutText, R.id.btnShortcutDelay, R.id.btnShortcutMouseLClick, R.id.btnShortcutMouseRClick
+                R.id.btnShortcutText, R.id.btnShortcutDelay, R.id.btnShortcutMouseMove, R.id.btnShortcutMouseHuman, R.id.btnShortcutMouseLClick, R.id.btnShortcutMouseRClick
         };
 
         String[] shortcuts = {
@@ -117,7 +143,7 @@ public class MacroActivity extends AppCompatActivity {
                 "F9\n", "F10\n", "F11\n", "F12\n",
 
                 // Ações & Comandos
-                "TEXT:\n", "DELAY:500\n", "MOUSE_LCLICK\n", "MOUSE_RCLICK\n"
+                "TEXT:\n", "DELAY:500\n", "MOVE:500,300\n", "MOVE_HUMAN:500,300,5\n", "MOUSE_LCLICK\n", "MOUSE_RCLICK\n"
         };
 
         for (int i = 0; i < buttonIds.length; i++) {
