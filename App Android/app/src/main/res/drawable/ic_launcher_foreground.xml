@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- BLE Waves -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M38,32 Q54,22 70,32" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#A855F7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M44,38 Q54,30 64,38" />
+
+    <!-- ESP32 Chip Body -->
+    <path
+        android:fillColor="#161C2E"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3"
+        android:pathData="M34,44 h40 a4,4 0 0 1 4,4 v32 a4,4 0 0 1 -4,4 h-40 a4,4 0 0 1 -4,-4 v-32 a4,4 0 0 1 4,-4 Z" />
+
+    <!-- Chip Pins Left -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M24,49 h6 v3 h-6 Z M24,56 h6 v3 h-6 Z M24,63 h6 v3 h-6 Z M24,70 h6 v3 h-6 Z" />
+
+    <!-- Chip Pins Right -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M78,49 h6 v3 h-6 Z M78,56 h6 v3 h-6 Z M78,63 h6 v3 h-6 Z M78,70 h6 v3 h-6 Z" />
+
+    <!-- USB Connector Graphic -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M47,51 h14 v15 h-14 Z" />
+    <path
+        android:fillColor="#161C2E"
+        android:pathData="M50,54 h3 v3 h-3 Z M55,54 h3 v3 h-3 Z" />
+
+    <!-- Cable Plug -->
+    <path
+        android:fillColor="#A855F7"
+        android:pathData="M49,66 h10 v12 h-10 Z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M52,78 h4 v8 h-4 Z" />
+</vector>

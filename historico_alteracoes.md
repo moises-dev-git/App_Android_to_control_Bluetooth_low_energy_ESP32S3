@@ -51,6 +51,10 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
   - Implementada intercepção de gestos de toque (`requestDisallowInterceptTouchEvent(true)`), permitindo deslizar o dedo na caixa de texto para rolar a macro de forma direta e fluida, **sem precisar abrir o teclado ou arrastar a agulha do cursor**.
   - Adicionada barra de rolagem vertical visível contínua (`android:scrollbars="vertical"`).
   - Incluídos botões de navegação rápida **`⬆️ Topo`** e **`⬇️ Fim`** no cabeçalho do campo para salto instantâneo no início ou fim de macros longas.
+* **Migração para Jetpack Compose & Material Design 3:**
+  - O aplicativo Android foi completamente modernizado com a toolkit **Jetpack Compose** e **Material 3**.
+  - Implementado tema escuro cyberpunk/IoT moderno ([`Theme.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ui/theme/Theme.kt), [`Color.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ui/theme/Color.kt)).
+  - Atualizadas as telas principais para componentes reativos em Kotlin ([`MainActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MainActivity.kt), [`ControlActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.kt), [`MacroActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MacroActivity.kt)), mantendo 100% da compatibilidade e lógica Bluetooth LE/GATT e salvamento de macros.
 
 ---
 
