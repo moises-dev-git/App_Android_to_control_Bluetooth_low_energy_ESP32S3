@@ -482,6 +482,8 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 void setup() {
   Serial.begin(115200);
 
+  USB.VID(0x303A);
+  USB.PID(0x8005);
   USB.productName("Mouse USB HID");
   USB.manufacturerName("HID Device");
   keyboard.begin();

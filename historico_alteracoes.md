@@ -56,6 +56,9 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
   - Implementado tema escuro cyberpunk/IoT moderno ([`Theme.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ui/theme/Theme.kt), [`Color.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ui/theme/Color.kt)).
   - Atualizadas as telas principais para componentes reativos em Kotlin ([`MainActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MainActivity.kt), [`ControlActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.kt), [`MacroActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/MacroActivity.kt)), mantendo 100% da compatibilidade e lógica Bluetooth LE/GATT e salvamento de macros.
 
+* **Ajuste de Identificação USB (PID):**
+  - Atualizado o Product ID para `0x8005` em [`ESP32-S3.ino`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/ESP32-S3.ino), mantendo a faixa oficial da Espressif (`VID: 0x303A`), garantindo que o Windows 11 e o Linux reconheçam a nova assinatura do dispositivo HID.
+
 ---
 
 ## ⚙️ Configuração da Arduino IDE para Compilação
@@ -63,5 +66,10 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
 Ao compilar o firmware no ESP32-S3, selecione:
 * **Placa:** `ESP32S3 Dev Module`
 * **Partition Scheme:** `Huge APP (3MB No OTA / 1MB SPIFFS)`
-* **USB CDC On Boot:** `Enabled`
-* **USB Mode:** `Hardware CDC and JTAG`
+* **USB CDC On Boot:** `Disabled` *(permite customizar PID e descritores HID)*
+* **USB Mode:** `USB-OTG (TinyUSB)`
+
+> 💡 **Nota sobre status na Arduino IDE (`Disconnected`):**
+> Como a porta COM serial foi desativada no boot (`USB CDC On Boot = Disabled`) para permitir o PID customizado `0x8005`, a placa não abre uma porta COM contínua e a Arduino IDE exibirá o status **`disconnected`** durante o uso normal.
+> Para realizar novos uploads pela IDE, basta entrar no modo de gravação via hardware (segurar **`BOOT`** -> clicar **`RESET`** -> soltar **`BOOT`**).
+

@@ -40,9 +40,20 @@ Para compilar e carregar o firmware no **ESP32-S3** sem estouro de memória Flas
 | :--- | :--- | :--- |
 | **Placa (Board)** | `ESP32S3 Dev Module` | Placa de desenvolvimento com suporte ao chip ESP32-S3. |
 | **Esquema de Partição (Partition Scheme)** | **`Huge APP (3MB No OTA / 1MB SPIFFS)`** | **CRÍTICO:** A biblioteca oficial Bluedroid BLE + USB HID ocupa mais de 1.3MB. A partição padrão (4MB Default) estoura a memória. A opção *Huge APP* disponibiliza 3MB livres para o programa. |
-| **USB CDC On Boot** | `Enabled` | Permite visualizar as mensagens do `Serial.println()` no Monitor Serial na velocidade 115200 baud. |
-| **USB Mode** | `Hardware CDC and JTAG` *(ou USB-OTG TinyUSB)* | Habilita a emulação nativa dos periféricos de Teclado e Mouse USB. |
+| **USB CDC On Boot** | `Disabled` | **Recomendado para HID Puro:** Desativa a porta COM pré-carregada na inicialização, permitindo aplicar o PID customizado (`0x8005`) e registrar o dispositivo como `Mouse USB HID`. |
+| **USB Mode** | `USB-OTG (TinyUSB)` | Habilita a pilha software TinyUSB para controle total dos descritores de Teclado e Mouse USB. |
 | **Core ESP32** | `esp32` por Espressif Systems (v2.0.x ou v3.x) | Pacote oficial de placas ESP32 para Arduino. |
+
+> [!NOTE]
+> **Comportamento na Arduino IDE (`Disconnected` / Sem Porta COM Visible):**
+> Como a porta COM serial foi desativada no boot (`USB CDC On Boot = Disabled`) para liberar o PID customizado e a simulação pura de Teclado/Mouse HID, a placa aparecerá como **`disconnected`** ou sem porta COM na Arduino IDE durante o uso normal.
+> 
+> **Como gravar novos códigos na Arduino IDE:**
+> 1. Pressione e segure o botão **`BOOT`** no ESP32-S3.
+> 2. Pressione e solte o botão **`RESET`** (ou `EN`).
+> 3. Solte o botão **`BOOT`** (a placa entra no modo Bootloader ROM da Espressif).
+> 4. A porta serial reaparecerá temporariamente na IDE. Selecione a porta e clique em **Upload**.
+> 5. Após a gravação terminar, pressione o botão **`RESET`** para voltar ao modo de execução normal (`Mouse USB HID`).
 
 ---
 
