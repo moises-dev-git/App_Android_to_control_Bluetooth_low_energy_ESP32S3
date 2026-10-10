@@ -29,7 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import com.example.esp32app.protocol.BleProtocol
+import com.example.esp32app.protocol.MacroStep
 import com.example.esp32app.ui.theme.*
+import kotlinx.coroutines.*
 import java.util.*
 
 @SuppressLint("MissingPermission")
@@ -47,13 +51,26 @@ class ControlActivity : ComponentActivity() {
     private var bluetoothGatt: BluetoothGatt? = null
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
 
+    // Fragmented Execution & Coroutines State
+    private var writeCompletionDeferred: CompletableDeferred<Boolean>? = null
+    private var macroExecutionJob: Job? = null
+
     // Compose State
     private val connectionStatusState = mutableStateOf("Conectando...")
     private val isConnectedState = mutableStateOf(false)
     private val espTempState = mutableStateOf<String?>(null)
     private val savedMacrosState = mutableStateListOf<Macro>()
+    private val isExecutingMacroState = mutableStateOf(false)
+    private val macroProgressState = mutableStateOf("")
 
     private val gattCallback = object : BluetoothGattCallback() {
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?,
+            status: Int
+        ) {
+            writeCompletionDeferred?.complete(status == BluetoothGatt.GATT_SUCCESS)
+        }
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
                 runOnUiThread { connectionStatusState.value = "Conectado! Configurando GATT..." }
@@ -151,7 +168,11 @@ class ControlActivity : ComponentActivity() {
                     isConnected = isConnectedState.value,
                     espTemp = espTempState.value,
                     macros = savedMacrosState,
+                    isExecutingMacro = isExecutingMacroState.value,
+                    macroProgress = macroProgressState.value,
                     onSendCommand = { command -> sendCommand(command) },
+                    onExecuteMacro = { macro -> executeMacroSequence(macro) },
+                    onCancelMacro = { cancelMacroExecution() },
                     onManageMacros = {
                         startActivity(Intent(this@ControlActivity, MacroActivity::class.java))
                     },
@@ -181,8 +202,95 @@ class ControlActivity : ComponentActivity() {
         }
     }
 
+    private suspend fun sendSinglePacket(packet: String): Boolean {
+        val gatt = bluetoothGatt ?: return false
+        val rx = rxCharacteristic ?: return false
+
+        val deferred = CompletableDeferred<Boolean>()
+        writeCompletionDeferred = deferred
+
+        rx.value = packet.toByteArray(Charsets.UTF_8)
+        val started = gatt.writeCharacteristic(rx)
+        if (!started) {
+            writeCompletionDeferred = null
+            return false
+        }
+
+        return try {
+            withTimeout(1500) {
+                deferred.await()
+            }
+        } catch (_: TimeoutCancellationException) {
+            true // tolerância para eventuais atrasos de callback do dispositivo
+        } finally {
+            writeCompletionDeferred = null
+        }
+    }
+
+    private fun executeMacroSequence(macro: Macro) {
+        if (!isConnectedState.value) {
+            Toast.makeText(this, "Não conectado ao ESP32", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val steps = BleProtocol.splitMacroIntoSteps(macro.content)
+        if (steps.isEmpty()) {
+            Toast.makeText(this, "A macro selecionada está vazia", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        macroExecutionJob?.cancel()
+        macroExecutionJob = lifecycleScope.launch {
+            isExecutingMacroState.value = true
+            val total = steps.size
+            try {
+                for ((index, step) in steps.withIndex()) {
+                    macroProgressState.value = "Passo ${index + 1} de $total"
+                    when (step) {
+                        is MacroStep.Delay -> {
+                            delay(step.millis)
+                        }
+                        is MacroStep.Command -> {
+                            val ok = sendSinglePacket(step.payload)
+                            if (!ok) {
+                                delay(40)
+                                sendSinglePacket(step.payload)
+                            }
+                            // Intervalo para o processador do ESP32 executar a ação USB HID
+                            delay(40)
+                        }
+                    }
+                }
+                macroProgressState.value = "Macro concluída com sucesso!"
+                delay(1800)
+                macroProgressState.value = ""
+            } catch (_: CancellationException) {
+                macroProgressState.value = "Execução cancelada"
+                delay(1200)
+                macroProgressState.value = ""
+            } catch (e: Exception) {
+                macroProgressState.value = "Erro no envio"
+                delay(1500)
+                macroProgressState.value = ""
+            } finally {
+                isExecutingMacroState.value = false
+            }
+        }
+    }
+
+    private fun cancelMacroExecution() {
+        macroExecutionJob?.cancel()
+        isExecutingMacroState.value = false
+        macroProgressState.value = "Cancelando..."
+        lifecycleScope.launch {
+            delay(1000)
+            macroProgressState.value = ""
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        macroExecutionJob?.cancel()
         bluetoothGatt?.disconnect()
     }
 }
@@ -195,7 +303,11 @@ fun ControlScreenContent(
     isConnected: Boolean,
     espTemp: String?,
     macros: List<Macro>,
+    isExecutingMacro: Boolean,
+    macroProgress: String,
     onSendCommand: (String) -> Unit,
+    onExecuteMacro: (Macro) -> Unit,
+    onCancelMacro: () -> Unit,
     onManageMacros: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -301,21 +413,21 @@ fun ControlScreenContent(
                     icon = Icons.Default.Language,
                     modifier = Modifier.weight(1f),
                     enabled = isConnected,
-                    onClick = { onSendCommand("CMD:CHROME") }
+                    onClick = { onSendCommand(BleProtocol.formatQuickCommand("CHROME")) }
                 )
                 QuickActionButton(
                     text = "Copiar",
                     icon = Icons.Default.ContentCopy,
                     modifier = Modifier.weight(1f),
                     enabled = isConnected,
-                    onClick = { onSendCommand("CMD:COPY") }
+                    onClick = { onSendCommand(BleProtocol.formatQuickCommand("COPY")) }
                 )
                 QuickActionButton(
                     text = "Colar",
                     icon = Icons.Default.ContentPaste,
                     modifier = Modifier.weight(1f),
                     enabled = isConnected,
-                    onClick = { onSendCommand("CMD:PASTE") }
+                    onClick = { onSendCommand(BleProtocol.formatQuickCommand("PASTE")) }
                 )
             }
 
@@ -328,14 +440,14 @@ fun ControlScreenContent(
                     icon = Icons.Default.Mouse,
                     modifier = Modifier.weight(1f),
                     enabled = isConnected,
-                    onClick = { onSendCommand("CMD:MOUSE_LCLICK") }
+                    onClick = { onSendCommand(BleProtocol.formatQuickCommand("MOUSE_LCLICK")) }
                 )
                 QuickActionButton(
                     text = "Clique Dir.",
                     icon = Icons.Default.AdsClick,
                     modifier = Modifier.weight(1f),
                     enabled = isConnected,
-                    onClick = { onSendCommand("CMD:MOUSE_RCLICK") }
+                    onClick = { onSendCommand(BleProtocol.formatQuickCommand("MOUSE_RCLICK")) }
                 )
             }
 
@@ -368,7 +480,7 @@ fun ControlScreenContent(
                     Button(
                         onClick = {
                             if (textToSend.isNotEmpty()) {
-                                onSendCommand("TXT:$textToSend")
+                                onSendCommand(BleProtocol.formatTextCommand(textToSend))
                                 textToSend = ""
                             }
                         },
@@ -445,12 +557,7 @@ fun ControlScreenContent(
                                     if (shiftChecked) mods.add("SHIFT")
                                     if (winChecked) mods.add("WIN")
 
-                                    val combo = if (mods.isNotEmpty()) {
-                                        mods.joinToString("+") + "+" + comboKey.trim().uppercase()
-                                    } else {
-                                        comboKey.trim().uppercase()
-                                    }
-                                    onSendCommand("CMD:KEY:$combo")
+                                    onSendCommand(BleProtocol.formatKeyCombo(mods, comboKey))
                                 }
                             },
                             enabled = isConnected && comboKey.isNotBlank(),
@@ -524,22 +631,42 @@ fun ControlScreenContent(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        if (isExecutingMacro || macroProgress.isNotEmpty()) {
+                            Text(
+                                text = if (isExecutingMacro) "Status: $macroProgress" else macroProgress,
+                                color = if (isExecutingMacro) CyanPrimary else ConnectedGreen,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
 
-                        Button(
-                            onClick = {
-                                if (selectedMacroIndex < macros.size) {
-                                    val selected = macros[selectedMacroIndex]
-                                    onSendCommand("SEQ:${selected.content}")
-                                }
-                            },
-                            enabled = isConnected,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary, contentColor = CyanOnPrimary)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Executar Sequência da Macro", fontWeight = FontWeight.Bold)
+                        if (isExecutingMacro) {
+                            Button(
+                                onClick = onCancelMacro,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError)
+                            ) {
+                                Icon(Icons.Default.Stop, contentDescription = null)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Cancelar Execução da Macro", fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    if (selectedMacroIndex < macros.size) {
+                                        val selected = macros[selectedMacroIndex]
+                                        onExecuteMacro(selected)
+                                    }
+                                },
+                                enabled = isConnected && macros.isNotEmpty(),
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary, contentColor = CyanOnPrimary)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Executar Sequência da Macro", fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }

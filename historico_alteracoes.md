@@ -61,6 +61,24 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
 
 ---
 
+### 3. Test-Driven Development (TDD) e Envio Fragmentado de Macros
+
+* **Suíte Completa de Testes TDD (Android e C++):**
+  - Implementados testes unitários de modelo, serialização JSON e regras de negócio ([`MacroTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/model/MacroTest.kt), [`MacroSerializerTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/data/MacroSerializerTest.kt), [`MacroBusinessLogicTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/data/MacroBusinessLogicTest.kt)).
+  - Implementada suíte de testes de protocolo BLE ([`BleProtocolTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/protocol/BleProtocolTest.kt)).
+  - Implementada suíte de testes nativa C++ para validação do firmware ESP32 ([`test_esp32_protocol.cpp`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/tests_firmware/test_esp32_protocol.cpp)).
+  - Script unificado [`run_tests.sh`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/run_tests.sh) para validação rápida de regressão.
+* **Envio Fragmentado de Macros (Suporte a Macros Ilimitadas):**
+  - Desacoplamento da geração de comandos no módulo [`BleProtocol.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/protocol/BleProtocol.kt) com fatiamento inteligente (`splitMacroIntoSteps`).
+  - Quebra automática de blocos longos de texto em pacotes seguros de até 180 bytes, eliminando a barreira física do MTU de pacote único (~505 bytes).
+  - Execução assíncrona com Coroutines e confirmação GATT (`onCharacteristicWrite`) no [`ControlActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.kt).
+  - Exibição de progresso em tempo real e botão de cancelamento imediato da macro na interface.
+* **Proteção de Estouro de MTU no ESP32-S3 ([`ESP32-S3.ino`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/ESP32-S3.ino)):**
+  - Configurado `BLEDevice::setMTU(517)`.
+  - Truncamento seguro de payloads na notificação de resposta ACK para impedir estouro de buffer BLE.
+
+---
+
 ## ⚙️ Configuração da Arduino IDE para Compilação
 
 Ao compilar o firmware no ESP32-S3, selecione:

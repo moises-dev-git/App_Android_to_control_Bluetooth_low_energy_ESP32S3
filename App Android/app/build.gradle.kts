@@ -37,6 +37,9 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -54,5 +57,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.compose.material:material-icons-extended")
 
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20231013")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

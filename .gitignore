@@ -10,3 +10,9 @@ local.properties
 .DS_Store
 Thumbs.db
 *.tmp
+
+# Compiled test binaries
+tests_firmware/test_esp32_protocol
+*.o
+*.out
+

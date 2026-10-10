@@ -470,7 +470,8 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
         // --- SEND RESPONSE TO MOBILE APP ---
         if (pTxCharacteristic != nullptr) {
-          String resposta = "OK! Received: " + rxValue;
+          String ack = rxValue.length() > 60 ? rxValue.substring(0, 57) + "..." : rxValue;
+          String resposta = "OK! Received: " + ack;
           pTxCharacteristic->setValue(resposta.c_str());
           pTxCharacteristic->notify();
           Serial.println("Response sent to mobile app.");
@@ -491,6 +492,7 @@ void setup() {
   USB.begin();
 
   BLEDevice::init("ESP32-S3-UART");
+  BLEDevice::setMTU(517);
 
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());

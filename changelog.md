@@ -38,6 +38,24 @@ This document records the full history of modifications made to the **ESP32-S3 B
 
 ---
 
+### 3. Test-Driven Development (TDD) & Fragmented Macro Transmission
+
+* **Comprehensive TDD Test Suite (Android & C++):**
+  - Added unit test suites for data models, JSON serialization, and business rules ([`MacroTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/model/MacroTest.kt), [`MacroSerializerTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/data/MacroSerializerTest.kt), [`MacroBusinessLogicTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/data/MacroBusinessLogicTest.kt)).
+  - Added BLE protocol formatter and parser tests ([`BleProtocolTest.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/test/java/com/example/esp32app/protocol/BleProtocolTest.kt)).
+  - Added native C++ firmware protocol validation test suite ([`test_esp32_protocol.cpp`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/tests_firmware/test_esp32_protocol.cpp)).
+  - Added unified regression runner script [`run_tests.sh`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/run_tests.sh).
+* **Fragmented Macro Transmission (Unlimited Macro Size Support):**
+  - Extracted command formatting and packet chunking into [`BleProtocol.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/protocol/BleProtocol.kt) (`splitMacroIntoSteps`).
+  - Automatically slices long text blocks into safe <= 180-byte chunks, eliminating single-packet MTU limitations (~505 bytes).
+  - Implemented asynchronous coroutine sequence execution with GATT write confirmation (`onCharacteristicWrite`) in [`ControlActivity.kt`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/App%20Android/app/src/main/java/com/example/esp32app/ControlActivity.kt).
+  - Real-time step progress indicator and immediate cancellation button in the UI.
+* **Firmware MTU & Buffer Overflow Protection ([`ESP32-S3.ino`](file:///home/moises/.gemini/antigravity/scratch/ESP32-S3/ESP32-S3.ino)):**
+  - Set `BLEDevice::setMTU(517)`.
+  - Added safe truncation for response notification ACKs to prevent BLE buffer overflow.
+
+---
+
 ## ⚙️ Arduino IDE Compilation Settings
 
 When flashing ESP32-S3 firmware:
