@@ -79,6 +79,21 @@ A pasta [`Cópias de segurança/`](file:///home/moises/.gemini/antigravity/scrat
 
 ---
 
+### 4. Visão da Tela do PC (Captura HDMI, OCR e Busca de Imagens)
+
+* **Integração da captura HDMI do projeto AndroidUSBCamera** (apenas o necessário):
+  - Captura UVC via biblioteca `libausbc`/`libuvc` (JitPack `com.github.ernestp.AndroidUSBCamera:3.6.0`), sem a parte de demonstração (efeitos, gravação, render OpenGL na tela, CameraX, envio a servidores).
+  - OCR com ML Kit **embutido** (funciona offline) e busca de modelos de imagem com OpenCV 4.12.
+  - Nova tela **Visão** (`VisionActivity.kt`): imagem ao vivo, teste de OCR, recorte e gerenciamento de modelos de imagem.
+* **Novos comandos de macro**, executados pelo app: `WAIT_TEXT`, `WAIT_NOT_TEXT`, `CLICK_TEXT`, `MOVE_TEXT`, `WAIT_IMAGE`, `WAIT_NOT_IMAGE`, `CLICK_IMAGE`, `MOVE_IMAGE`, `IF_TEXT`/`IF_NOT_TEXT`/`IF_IMAGE`/`IF_NOT_IMAGE` ... `ELSE` ... `END_IF`, `REPEAT:n` ... `END_REPEAT`, `STOP` e comentários `//` (pacote `macro`: `MacroScript.kt`, `MacroRunner.kt`).
+* **Sincronização com o ESP32:** o app agora espera a confirmação `OK! Received:` (enviada após a ação HID) antes do passo seguinte.
+* **Calibração do monitor capturado** (`ScreenMapping.kt`, `ScreenMappingDialog.kt`): com vários monitores, o mouse absoluto cobre a área de trabalho inteira e os cliques caíam fora do texto. O app agora converte a posição encontrada na captura para a posição do monitor dentro da área de trabalho (configurada no Painel, com botões de teste).
+* **Firmware:** novo dispositivo **mouse absoluto HID** (report ID 7) e comando `ABS:x,y[,speed]`; o mouse relativo e os comandos antigos não mudaram.
+* **Toolchain do app atualizado:** AGP 8.10.1, Kotlin 2.2.10 (plugin Compose do Kotlin), Gradle 8.13, compileSdk 36 (targetSdk mantido em 34). Necessário para consumir a biblioteca de captura.
+* **Testes:** `MacroScriptTest`, `MacroRunnerTest`, `TextMatcherTest`, `ScreenMappingTest`, testes de ACK no `BleProtocolTest` e teste do parser `ABS:` no firmware.
+
+---
+
 ## ⚙️ Configuração da Arduino IDE para Compilação
 
 Ao compilar o firmware no ESP32-S3, selecione:

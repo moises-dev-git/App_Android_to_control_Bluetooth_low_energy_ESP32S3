@@ -56,6 +56,20 @@ This document records the full history of modifications made to the **ESP32-S3 B
 
 ---
 
+### 4. PC Screen Vision (HDMI Capture, OCR & Image Matching)
+
+* **HDMI capture integrated from the AndroidUSBCamera proof of concept** (only what is needed):
+  - UVC capture via `libausbc`/`libuvc` (JitPack `com.github.ernestp.AndroidUSBCamera:3.6.0`), without the demo parts (effects, recording, on-screen OpenGL render, CameraX, server uploads).
+  - **Bundled** ML Kit OCR (works offline) and OpenCV 4.12 template matching.
+  - New **Vision** screen (`VisionActivity.kt`): live image, OCR testing, cropping and managing image templates.
+* **New macro commands**, executed by the app: `WAIT_TEXT`, `WAIT_NOT_TEXT`, `CLICK_TEXT`, `MOVE_TEXT`, `WAIT_IMAGE`, `WAIT_NOT_IMAGE`, `CLICK_IMAGE`, `MOVE_IMAGE`, `IF_TEXT`/`IF_NOT_TEXT`/`IF_IMAGE`/`IF_NOT_IMAGE` ... `ELSE` ... `END_IF`, `REPEAT:n` ... `END_REPEAT`, `STOP` and `//` comments.
+* **ESP32 synchronization:** the app now waits for the `OK! Received:` notification (sent after the HID action) before the next step.
+* **Captured monitor calibration** (`ScreenMapping.kt`, `ScreenMappingDialog.kt`): with multiple monitors the absolute mouse spans the whole desktop, so clicks missed the text. The app now maps positions found in the capture to the monitor's position inside the desktop (set in the Control panel, with test buttons).
+* **Firmware:** new **absolute HID mouse** device (report ID 7) and `ABS:x,y[,speed]` command; the relative mouse and legacy commands are unchanged.
+* **App toolchain upgraded:** AGP 8.10.1, Kotlin 2.2.10 (Kotlin Compose plugin), Gradle 8.13, compileSdk 36 (targetSdk kept at 34).
+
+---
+
 ## ⚙️ Arduino IDE Compilation Settings
 
 When flashing ESP32-S3 firmware:

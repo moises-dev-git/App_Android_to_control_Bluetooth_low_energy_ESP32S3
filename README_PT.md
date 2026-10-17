@@ -13,6 +13,8 @@ Este projeto consiste em uma solução completa para controle remoto de um compu
 - **Mapeamento de Teclas Especiais:** Suporta `ENTER`, `ESC`, `TAB`, `DEL`/`DELETE`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `CAPSLOCK`, setas direcionais e teclas de função `F1` a `F12`.
 - **Movimento e Clique de Mouse:** Posicionamento de ponteiro com opção **Direta** (`MOVE:x,y`) ou **Humanizada** (`MOVE_HUMAN:x,y,speed`) com Curvas de Bézier e aceleração/desaceleração natural (Ease-In-Out), além de controle de velocidade (1-10) e cliques.
 - **Execução de Macros Sequenciais (`SEQ:`):** Executa rotinas automáticas com posicionamento de ponteiro humano/direto, atrasos (`DELAY:ms`), digitação de texto e atalhos.
+- **Visão da Tela do PC (Captura HDMI):** Com uma placa de captura HDMI→USB no celular, as macros podem esperar, verificar e clicar em textos (OCR offline com ML Kit) e imagens (OpenCV) exibidos na tela: `WAIT_TEXT`, `CLICK_TEXT`, `IF_TEXT ... ELSE ... END_IF`, `CLICK_IMAGE`, `REPEAT`. Detalhes na seção 8 de [`documentacao_projeto.md`](documentacao_projeto.md).
+- **Mouse Absoluto HID (`ABS:x,y`):** Posicionamento exato do cursor (0..32767), independente da aceleração do ponteiro.
 - **Carrossel por Categorias no Android:** Interface do app com rolagem lateral organizada em 5 categorias para seleção de teclas.
 
 ---

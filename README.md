@@ -13,6 +13,8 @@ This repository contains a complete end-to-end solution for remotely controlling
 - **Special Keys Mapping:** Full support for `ENTER`, `ESC`, `TAB`, `DEL`/`DELETE`, `BACKSPACE`, `INSERT`, `HOME`, `END`, `PAGEUP`, `PAGEDOWN`, `CAPSLOCK`, directional arrows, and function keys `F1` through `F12`.
 - **Mouse Movement & Clicking:** Mouse pointer positioning with **Direct** (`MOVE:x,y`) or **Humanized** (`MOVE_HUMAN:x,y,speed`) mode using Quadratic Bézier curves and natural Ease-In-Out acceleration/deceleration, plus adjustable speed (1-10) and clicks.
 - **Sequential Macro Execution (`SEQ:`):** Automated routines with human/direct pointer positioning, delays (`DELAY:ms`), text typing, and key shortcuts.
+- **PC Screen Vision (HDMI Capture):** With an HDMI→USB capture card plugged into the phone, macros can wait for, check and click on text (offline OCR with ML Kit) and images (OpenCV) shown on screen: `WAIT_TEXT`, `CLICK_TEXT`, `IF_TEXT ... ELSE ... END_IF`, `CLICK_IMAGE`, `REPEAT`. See section 8 of [`documentacao_projeto.md`](documentacao_projeto.md) (Portuguese).
+- **Absolute HID Mouse (`ABS:x,y`):** Exact cursor positioning (0..32767), unaffected by pointer acceleration.
 - **Categorized Key Carousel in Android:** Category-based horizontal carousel interface in the Android app for easy key selection.
 
 ---

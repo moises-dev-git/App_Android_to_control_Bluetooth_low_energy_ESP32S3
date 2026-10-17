@@ -95,6 +95,7 @@ A tela de Gerenciador de Macros foi construída utilizando **Carrosséis Horizon
 | `CMD:MOUSE_RCLICK` | `CMD:MOUSE_RCLICK` | Clique com o botão direito do mouse. |
 | `CMD:MOVE:x,y` | `CMD:MOVE:500,300` | Movimento Direto: reseta para (0,0) e move em linha reta até (x, y). |
 | `CMD:MOVE_HUMAN:x,y,speed` | `CMD:MOVE_HUMAN:500,300,5` | Movimento Humanizado: reseta suavemente para (0,0) e descreve uma Curva de Bézier com desaceleração e velocidade customizável (1-10). |
+| `CMD:ABS:x,y[,speed]` | `CMD:ABS:16383,8191` | **Mouse absoluto** (0..32767 em cada eixo = tela inteira). Posição exata, sem influência da aceleração do ponteiro. Com `speed` (1-10), faz curva de Bézier humanizada a partir da última posição absoluta. Usado pelo app em `CLICK_TEXT`/`CLICK_IMAGE`. |
 | `CMD:KEY:combinação` | `CMD:KEY:CTRL+SHIFT+ESC` | Pressiona a combinação dinâmica de teclas. |
 | `SEQ:linhas` | `SEQ:MOVE_HUMAN:500,300,5\nDELAY:500\nENTER` | Executa uma sequência de comandos linha a linha (Macro). |
 
@@ -115,4 +116,62 @@ Para permitir a digitação perfeita de caracteres acentuados (`ã`, `Ã`, `ç`,
   * `CMD:ACCENT_DEADKEY` (ou `CMD:ACCENT:0`): Modo Teclas Mortas ABNT2 (Padrão para Linux Mint e Windows ABNT2).
   * `CMD:ACCENT_LINUX` (ou `CMD:ACCENT:1`): Modo Linux GTK Unicode (`Ctrl+Shift+U` + hex + `Enter`).
   * `CMD:ACCENT_ALTCODE` (ou `CMD:ACCENT:2`): Modo Windows Alt Codes (`Alt` + Numpad `0XXX`).
+
+---
+
+## 8. Visão da Tela do PC (Captura HDMI + OCR + Busca de Imagens)
+
+O app pode "enxergar" a tela do computador e tomar decisões durante a macro.
+
+### 🔌 Montagem
+```
+PC ──HDMI──▶ Placa de captura UVC (ex.: MS2109) ──USB OTG──▶ Celular Android
+PC ◀──USB── ESP32-S3 ◀──BLE── Celular Android
+```
+* O mouse absoluto do ESP32 é mapeado pelo sistema para a área de trabalho (no Linux/X11, a área inteira, somando todos os monitores). Com mais de um monitor, informe em **Painel → Captura HDMI → ícone de monitor** o tamanho total da área de trabalho e a posição/tamanho do monitor ligado à placa (ex.: principal 1920x1200 à esquerda e capturado 1920x1080 à direita → área 3840x1200, posição 1920,0, tamanho 1920x1080). Os botões **Canto/Centro** do diálogo movem o cursor para conferir. Sem essa calibração, `MOVE_`/`CLICK_TEXT` e `_IMAGE` acertam só com um único monitor ou em modo **"duplicar"**.
+* Na primeira vez, abra **Painel → Visão**, conceda a permissão de câmera (exigida pela biblioteca UVC) e autorize o acesso USB à placa. Depois disso a captura liga sozinha ao abrir o Painel.
+
+### 🧩 Componentes (pacote `com.example.esp32app.vision`)
+| Componente | Função |
+| :--- | :--- |
+| `HdmiCapture` | Abre a placa UVC com a biblioteca `libausbc` (JitPack `com.github.ernestp.AndroidUSBCamera:3.6.0`), renderização fora da tela, e guarda o frame YUV mais recente (até 1920x1080). |
+| `OcrEngine` | OCR com **ML Kit Text Recognition** (modelo latino embutido no APK, funciona **offline** e sem Google Play Services). |
+| `TextMatcher` | Localiza o texto procurado (ignora maiúsculas, acentos e espaços) e devolve a caixa da palavra/trecho. |
+| `ImageMatcher` + `TemplateStore` | Busca de modelos de imagem com **OpenCV** `matchTemplate` (similaridade mínima 0,80). Modelos ficam em `filesDir/templates` (PNG + resolução de origem, para reescalar se a captura mudar de resolução). |
+| `MacroScript` / `MacroRunner` (pacote `macro`) | Parser e interpretador das macros com comandos de visão e controle de fluxo. |
+
+### 📝 Comandos de Macro (executados no app)
+Texto/imagem podem receber um **tempo limite opcional em ms** no final (padrão 10000): `WAIT_TEXT:Salvar,5000`.
+Se o trecho após a última vírgula não for número, a vírgula faz parte do texto (`CLICK_TEXT:Sim, continuar`).
+
+| Comando | Ação |
+| :--- | :--- |
+| `WAIT_TEXT:texto[,ms]` / `WAIT_NOT_TEXT:texto[,ms]` | Espera o texto aparecer / sumir. Se o tempo acabar, a macro é **interrompida**. |
+| `WAIT_IMAGE:nome[,ms]` / `WAIT_NOT_IMAGE:nome[,ms]` | Idem para um modelo de imagem. |
+| `CLICK_TEXT:texto[,ms]` / `CLICK_IMAGE:nome[,ms]` | Espera encontrar, move o mouse (absoluto) até o centro e clica com o botão esquerdo. |
+| `MOVE_TEXT:texto[,ms]` / `MOVE_IMAGE:nome[,ms]` | Apenas move o mouse até o centro (combine com `MOUSE_RCLICK`, por exemplo). |
+| `IF_TEXT:texto` / `IF_NOT_TEXT:texto` ... `ELSE` ... `END_IF` | Executa um bloco conforme o texto estar (ou não) na tela. Blocos podem ser aninhados. |
+| `IF_IMAGE:nome` / `IF_NOT_IMAGE:nome` ... `ELSE` ... `END_IF` | Idem para modelos de imagem. |
+| `REPEAT:n` ... `END_REPEAT` | Repete o bloco `n` vezes (1 a 10000). |
+| `STOP` | Encerra a macro com sucesso. |
+| `END_IF` / `END_REPEAT` | Fecham os blocos. `END` sozinho continua sendo a **tecla End**. |
+| `// comentário` | Linha ignorada. |
+
+Exemplo:
+```
+CHROME
+WAIT_TEXT:Nova guia,8000
+CTRL+L
+TEXT:exemplo.com
+ENTER
+IF_TEXT:Aceitar cookies
+  CLICK_TEXT:Aceitar cookies
+END_IF
+CLICK_IMAGE:botao_login,15000
+```
+
+### ⏱️ Sincronização
+* O app espera a notificação `OK! Received: ...` do ESP32 (enviada **depois** que a ação HID termina) antes do próximo passo, com tolerância de 12 s.
+* Antes de cada leitura de tela, o app aguarda ao menos 400 ms desde o último comando, para o PC redesenhar e o frame novo chegar pela placa de captura.
+* A macro é validada ao salvar (blocos `IF_`/`REPEAT` sem `END_IF`/`END_REPEAT`, `ELSE` solto, tempos inválidos), e antes de executar o app confere se os modelos de imagem existem e se há imagem da captura.
 
