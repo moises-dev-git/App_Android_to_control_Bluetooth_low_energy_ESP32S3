@@ -2,6 +2,8 @@ package com.example.esp32app
 
 import android.os.Bundle
 import android.widget.Toast
+import com.example.esp32app.macro.MacroParseException
+import com.example.esp32app.macro.MacroScript
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -61,6 +63,14 @@ class MacroActivity : ComponentActivity() {
     private fun saveMacro(name: String, content: String) {
         if (name.isBlank() || content.isBlank()) {
             Toast.makeText(this, "Preencha o nome e o conteúdo da macro", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Valida a estrutura (IF_/ELSE/END, REPEAT, tempos limite) antes de salvar
+        try {
+            MacroScript.parse(content)
+        } catch (e: MacroParseException) {
+            Toast.makeText(this, "Erro na macro: ${e.message}", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -226,6 +236,33 @@ fun MacroScreenContent(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // SEÇÃO DE VISÃO DA TELA (CAPTURA HDMI)
+                    Text("Visão da Tela (HDMI):", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        val visionShortcuts = listOf(
+                            "WAIT_TEXT:\n", "CLICK_TEXT:\n", "MOVE_TEXT:\n", "WAIT_NOT_TEXT:\n",
+                            "IF_TEXT:\n", "IF_NOT_TEXT:\n", "ELSE\n", "END_IF\n",
+                            "WAIT_IMAGE:\n", "CLICK_IMAGE:\n", "MOVE_IMAGE:\n", "IF_IMAGE:\n", "IF_NOT_IMAGE:\n",
+                            "REPEAT:3\n", "END_REPEAT\n", "STOP\n", "// \n"
+                        )
+                        items(visionShortcuts) { item ->
+                            SuggestionChip(
+                                onClick = { appendShortcut(item) },
+                                label = { Text(item.trim(), fontSize = 11.sp) }
+                            )
+                        }
+                    }
+                    Text(
+                        "Texto/imagem + tempo limite opcional em ms: WAIT_TEXT:Salvar,5000. " +
+                            "Modelos de imagem são criados na tela Visão.",
+                        fontSize = 11.sp,
+                        color = TextSecondary
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 

@@ -105,6 +105,28 @@ object BleProtocol {
         }
     }
 
+    private const val ACK_PREFIX = "OK! Received: "
+
+    /** Bytes do pacote que o firmware ecoa na confirmação (ele trunca em 57 + "..." acima de 60). */
+    private const val ACK_ECHO_BYTES = 57
+
+    /**
+     * Verifica se a notificação [notification] é a confirmação ("OK! Received: <eco>") do
+     * pacote [packet]. O firmware só envia a confirmação depois de executar o comando.
+     * A comparação é feita em bytes, pois o firmware trunca o eco em bytes UTF-8.
+     */
+    fun isAckFor(notification: ByteArray, packet: String): Boolean {
+        val prefix = ACK_PREFIX.toByteArray(Charsets.UTF_8)
+        if (notification.size < prefix.size || !notification.copyOfRange(0, prefix.size).contentEquals(prefix)) {
+            return false
+        }
+        val echo = notification.copyOfRange(prefix.size, notification.size)
+        val sent = packet.toByteArray(Charsets.UTF_8)
+        val compareLen = if (sent.size > 60) ACK_ECHO_BYTES else sent.size
+        if (echo.size < compareLen || sent.size < compareLen) return false
+        return echo.copyOfRange(0, compareLen).contentEquals(sent.copyOfRange(0, compareLen))
+    }
+
     /**
      * Fragmenta o conteúdo de uma macro em passos individuais e seguros para envio BLE.
      * Suporta macros gigantescas com centenas ou milhares de linhas.

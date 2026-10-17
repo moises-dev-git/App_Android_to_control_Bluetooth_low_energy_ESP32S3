@@ -10,6 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Captura UVC (placa HDMI -> USB): com.github.ernestp.AndroidUSBCamera
+        maven { url = uri("https://jitpack.io") }
     }
 }
 rootProject.name = "ESP32 App"

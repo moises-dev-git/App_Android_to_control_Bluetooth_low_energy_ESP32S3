@@ -10,7 +10,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
+    <!-- Captura HDMI via placa UVC na USB do celular (exigida pela libausbc com targetSdk >= 28) -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+    <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <application
         android:allowBackup="true"
@@ -34,6 +39,9 @@
             android:windowSoftInputMode="adjustResize" />
         <activity 
             android:name=".MacroActivity" 
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".VisionActivity"
             android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

@@ -30,9 +30,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.example.esp32app.macro.MacroAbortedException
+import com.example.esp32app.macro.MacroParseException
+import com.example.esp32app.macro.MacroRunner
+import com.example.esp32app.macro.MacroScript
 import com.example.esp32app.protocol.BleProtocol
-import com.example.esp32app.protocol.MacroStep
 import com.example.esp32app.ui.theme.*
+import com.example.esp32app.vision.HdmiCapture
+import com.example.esp32app.vision.HdmiScreenVision
+import com.example.esp32app.vision.ScreenMapping
+import com.example.esp32app.vision.ScreenMappingStore
+import com.example.esp32app.vision.TemplateStore
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -46,6 +54,12 @@ class ControlActivity : ComponentActivity() {
         private val CHARACTERISTIC_UUID_RX = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
         private val CHARACTERISTIC_UUID_TX = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
         private val CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+
+        /**
+         * Tempo máximo esperando o ESP32 confirmar que executou um comando.
+         * Se estourar (ex.: firmware antigo ou notificação perdida), a macro segue em frente.
+         */
+        private const val ACK_TIMEOUT_MS = 12_000L
     }
 
     private var bluetoothGatt: BluetoothGatt? = null
@@ -53,6 +67,7 @@ class ControlActivity : ComponentActivity() {
 
     // Fragmented Execution & Coroutines State
     private var writeCompletionDeferred: CompletableDeferred<Boolean>? = null
+    @Volatile private var pendingAck: Pair<String, CompletableDeferred<Unit>>? = null
     private var macroExecutionJob: Job? = null
 
     // Compose State
@@ -62,6 +77,7 @@ class ControlActivity : ComponentActivity() {
     private val savedMacrosState = mutableStateListOf<Macro>()
     private val isExecutingMacroState = mutableStateOf(false)
     private val macroProgressState = mutableStateOf("")
+    private val screenMappingState = mutableStateOf(ScreenMapping.SINGLE_MONITOR)
 
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onCharacteristicWrite(
@@ -126,6 +142,10 @@ class ControlActivity : ComponentActivity() {
 
         override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
             if (characteristic != null && CHARACTERISTIC_UUID_TX == characteristic.uuid) {
+                val raw = characteristic.value ?: return
+                pendingAck?.let { (packet, deferred) ->
+                    if (BleProtocol.isAckFor(raw, packet)) deferred.complete(Unit)
+                }
                 val rx = characteristic.getStringValue(0)
                 if (rx != null && rx.startsWith("TEMP:")) {
                     runOnUiThread {
@@ -160,6 +180,8 @@ class ControlActivity : ComponentActivity() {
             return
         }
 
+        screenMappingState.value = ScreenMappingStore.load(this)
+
         setContent {
             ESP32AppTheme {
                 ControlScreenContent(
@@ -176,6 +198,16 @@ class ControlActivity : ComponentActivity() {
                     onManageMacros = {
                         startActivity(Intent(this@ControlActivity, MacroActivity::class.java))
                     },
+                    captureStatus = HdmiCapture.statusState.value,
+                    captureMessage = HdmiCapture.messageState.value,
+                    onOpenVision = {
+                        startActivity(Intent(this@ControlActivity, VisionActivity::class.java))
+                    },
+                    screenMapping = screenMappingState.value,
+                    onSaveScreenMapping = { mapping ->
+                        ScreenMappingStore.save(this@ControlActivity, mapping)
+                        screenMappingState.value = mapping
+                    },
                     onBack = { finish() }
                 )
             }
@@ -184,6 +216,9 @@ class ControlActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Liga a captura HDMI automaticamente se a permissão de câmera já foi concedida
+        // (na primeira vez, ela é pedida pela tela de Visão)
+        if (HdmiCapture.hasCameraPermission(this)) HdmiCapture.start(this)
         savedMacrosState.clear()
         savedMacrosState.addAll(MacroManager.getMacros(this))
     }
@@ -208,22 +243,28 @@ class ControlActivity : ComponentActivity() {
 
         val deferred = CompletableDeferred<Boolean>()
         writeCompletionDeferred = deferred
+        val ack = CompletableDeferred<Unit>()
+        pendingAck = Pair(packet, ack)
 
-        rx.value = packet.toByteArray(Charsets.UTF_8)
-        val started = gatt.writeCharacteristic(rx)
-        if (!started) {
-            writeCompletionDeferred = null
-            return false
-        }
+        try {
+            rx.value = packet.toByteArray(Charsets.UTF_8)
+            val started = gatt.writeCharacteristic(rx)
+            if (!started) return false
 
-        return try {
-            withTimeout(1500) {
-                deferred.await()
+            val written = try {
+                withTimeout(1500) { deferred.await() }
+            } catch (_: TimeoutCancellationException) {
+                true // tolerância para eventuais atrasos de callback do dispositivo
             }
-        } catch (_: TimeoutCancellationException) {
-            true // tolerância para eventuais atrasos de callback do dispositivo
+            if (!written) return false
+
+            // O ESP32 só confirma depois de executar a ação HID. Esperar a confirmação garante
+            // que a tela do PC já reagiu antes de um WAIT_/IF_ seguinte olhar a captura.
+            withTimeoutOrNull(ACK_TIMEOUT_MS) { ack.await() }
+            return true
         } finally {
             writeCompletionDeferred = null
+            pendingAck = null
         }
     }
 
@@ -233,34 +274,43 @@ class ControlActivity : ComponentActivity() {
             return
         }
 
-        val steps = BleProtocol.splitMacroIntoSteps(macro.content)
-        if (steps.isEmpty()) {
+        val nodes = try {
+            MacroScript.parse(macro.content)
+        } catch (e: MacroParseException) {
+            Toast.makeText(this, "Erro na macro: ${e.message}", Toast.LENGTH_LONG).show()
+            return
+        }
+        if (nodes.isEmpty()) {
             Toast.makeText(this, "A macro selecionada está vazia", Toast.LENGTH_SHORT).show()
             return
         }
 
+        val usesVision = MacroScript.usesVision(nodes)
+        if (usesVision) {
+            val store = TemplateStore(this)
+            val missing = MacroScript.imageNames(nodes).filter { store.get(it) == null }
+            if (missing.isNotEmpty()) {
+                Toast.makeText(this, "Modelo(s) de imagem não encontrado(s): ${missing.joinToString()}", Toast.LENGTH_LONG).show()
+                return
+            }
+            if (!HdmiCapture.hasFreshFrame()) {
+                Toast.makeText(this, "Esta macro usa a tela do PC, mas a captura HDMI está sem imagem", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+
+        val runner = MacroRunner(
+            sender = { packet -> sendWithRetry(packet) },
+            vision = if (usesVision) HdmiScreenVision(this) else null,
+            mapping = screenMappingState.value,
+            onProgress = { text -> macroProgressState.value = text }
+        )
+
         macroExecutionJob?.cancel()
         macroExecutionJob = lifecycleScope.launch {
             isExecutingMacroState.value = true
-            val total = steps.size
             try {
-                for ((index, step) in steps.withIndex()) {
-                    macroProgressState.value = "Passo ${index + 1} de $total"
-                    when (step) {
-                        is MacroStep.Delay -> {
-                            delay(step.millis)
-                        }
-                        is MacroStep.Command -> {
-                            val ok = sendSinglePacket(step.payload)
-                            if (!ok) {
-                                delay(40)
-                                sendSinglePacket(step.payload)
-                            }
-                            // Intervalo para o processador do ESP32 executar a ação USB HID
-                            delay(40)
-                        }
-                    }
-                }
+                runner.run(nodes)
                 macroProgressState.value = "Macro concluída com sucesso!"
                 delay(1800)
                 macroProgressState.value = ""
@@ -268,14 +318,24 @@ class ControlActivity : ComponentActivity() {
                 macroProgressState.value = "Execução cancelada"
                 delay(1200)
                 macroProgressState.value = ""
+            } catch (e: MacroAbortedException) {
+                macroProgressState.value = "Interrompida: ${e.message}"
+                delay(5000)
+                macroProgressState.value = ""
             } catch (e: Exception) {
-                macroProgressState.value = "Erro no envio"
-                delay(1500)
+                macroProgressState.value = "Erro: ${e.message ?: e.javaClass.simpleName}"
+                delay(4000)
                 macroProgressState.value = ""
             } finally {
                 isExecutingMacroState.value = false
             }
         }
+    }
+
+    private suspend fun sendWithRetry(packet: String): Boolean {
+        if (sendSinglePacket(packet)) return true
+        delay(40)
+        return sendSinglePacket(packet)
     }
 
     private fun cancelMacroExecution() {
@@ -292,6 +352,7 @@ class ControlActivity : ComponentActivity() {
         super.onDestroy()
         macroExecutionJob?.cancel()
         bluetoothGatt?.disconnect()
+        HdmiCapture.stop()
     }
 }
 
@@ -309,8 +370,14 @@ fun ControlScreenContent(
     onExecuteMacro: (Macro) -> Unit,
     onCancelMacro: () -> Unit,
     onManageMacros: () -> Unit,
+    captureStatus: HdmiCapture.Status,
+    captureMessage: String,
+    onOpenVision: () -> Unit,
+    screenMapping: ScreenMapping,
+    onSaveScreenMapping: (ScreenMapping) -> Unit,
     onBack: () -> Unit
 ) {
+    var showScreenMappingDialog by remember { mutableStateOf(false) }
     var textToSend by remember { mutableStateOf("") }
     var comboKey by remember { mutableStateOf("") }
     var ctrlChecked by remember { mutableStateOf(false) }
@@ -569,6 +636,59 @@ fun ControlScreenContent(
                 }
             }
 
+            // --- CAPTURA HDMI (VISÃO DA TELA DO PC) ---
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when (captureStatus) {
+                                    HdmiCapture.Status.STREAMING -> ConnectedGreen
+                                    HdmiCapture.Status.ERROR -> MaterialTheme.colorScheme.error
+                                    else -> WarningYellow
+                                }
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Captura HDMI",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 15.sp
+                        )
+                        Text(text = captureMessage, color = TextSecondary, fontSize = 12.sp)
+                        Text(
+                            text = if (screenMapping.isSingleMonitor) "Monitor: único"
+                            else "Monitor: ${screenMapping.monitorWidth}x${screenMapping.monitorHeight} em " +
+                                "${screenMapping.monitorX},${screenMapping.monitorY} de " +
+                                "${screenMapping.desktopWidth}x${screenMapping.desktopHeight}",
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
+                    IconButton(onClick = { showScreenMappingDialog = true }) {
+                        Icon(Icons.Default.Monitor, contentDescription = "Calibrar monitor", tint = CyanPrimary)
+                    }
+                    TextButton(onClick = onOpenVision) {
+                        Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(16.dp), tint = CyanPrimary)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Visão", color = CyanPrimary, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
             // --- MACROS ---
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -672,6 +792,19 @@ fun ControlScreenContent(
                 }
             }
         }
+    }
+
+    if (showScreenMappingDialog) {
+        ScreenMappingDialog(
+            initial = screenMapping,
+            isConnected = isConnected,
+            onSendCommand = onSendCommand,
+            onSave = { mapping ->
+                onSaveScreenMapping(mapping)
+                showScreenMappingDialog = false
+            },
+            onDismiss = { showScreenMappingDialog = false }
+        )
     }
 }
 

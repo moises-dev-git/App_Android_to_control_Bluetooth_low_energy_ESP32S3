@@ -1,11 +1,14 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.example.esp32app"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.esp32app"
@@ -15,6 +18,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // OpenCV e libuvc trazem .so nativos; limitar às ABIs de celulares reais reduz o APK
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     buildTypes {
@@ -27,18 +35,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
         viewBinding = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     testOptions {
         unitTests.isReturnDefaultValues = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -56,6 +64,12 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Visão computacional: captura HDMI (UVC), OCR offline e busca de imagens
+    implementation("com.github.ernestp.AndroidUSBCamera:libausbc:3.6.0")
+    implementation("com.github.ernestp.AndroidUSBCamera:libuvc:3.6.0") // USBMonitor (API pública usada pela libausbc)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    implementation("org.opencv:opencv:4.12.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20231013")

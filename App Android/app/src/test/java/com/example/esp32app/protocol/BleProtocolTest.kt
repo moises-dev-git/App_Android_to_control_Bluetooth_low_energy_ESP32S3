@@ -161,5 +161,29 @@ class BleProtocolTest {
             }
         }
     }
-}
 
+    // --- Confirmação de execução (ACK) ---
+
+    private fun ack(echo: String) = ("OK! Received: " + echo).toByteArray(Charsets.UTF_8)
+
+    /** Simula o firmware: trunca o eco em 57 bytes + "..." quando o pacote passa de 60 bytes. */
+    private fun firmwareAck(packet: String): ByteArray {
+        val bytes = packet.toByteArray(Charsets.UTF_8)
+        val echo = if (bytes.size > 60) bytes.copyOfRange(0, 57) + "...".toByteArray() else bytes
+        return "OK! Received: ".toByteArray() + echo
+    }
+
+    @Test
+    fun testIsAckForShortPacket() {
+        assertTrue(BleProtocol.isAckFor(ack("CMD:ENTER"), "CMD:ENTER"))
+        assertFalse(BleProtocol.isAckFor(ack("CMD:TAB"), "CMD:ENTER"))
+        assertFalse(BleProtocol.isAckFor("TEMP:40.00C".toByteArray(), "CMD:ENTER"))
+    }
+
+    @Test
+    fun testIsAckForLongPacketTruncatedMidUtf8Char() {
+        val packet = "TXT:" + "ação ".repeat(30)
+        assertTrue(BleProtocol.isAckFor(firmwareAck(packet), packet))
+        assertFalse(BleProtocol.isAckFor(firmwareAck("TXT:" + "outro ".repeat(30)), packet))
+    }
+}
