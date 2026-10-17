@@ -91,6 +91,35 @@ bool parseMouseCommand(const std::string& cmd, MouseParams& out) {
     return true;
 }
 
+// Mouse absoluto (ABS:x,y[,velocidade]) - espelha parseAbsParams + constrain do ESP32-S3.ino
+#define ABS_MOUSE_MAX 32767
+
+struct AbsParams {
+    int x;
+    int y;
+    int speed;
+    bool isHuman;
+};
+
+int clampAbs(int v) { return v < 0 ? 0 : (v > ABS_MOUSE_MAX ? ABS_MOUSE_MAX : v); }
+
+bool parseAbsParams(const std::string& params, AbsParams& out) {
+    size_t c1 = params.find(',');
+    if (c1 == std::string::npos) return false;
+    out.x = std::stoi(params.substr(0, c1));
+    size_t c2 = params.find(',', c1 + 1);
+    out.speed = 5;
+    if (c2 == std::string::npos) {
+        out.y = std::stoi(params.substr(c1 + 1));
+        out.isHuman = false;
+    } else {
+        out.y = std::stoi(params.substr(c1 + 1, c2 - c1 - 1));
+        out.speed = std::stoi(params.substr(c2 + 1));
+        out.isHuman = true;
+    }
+    return true;
+}
+
 int main() {
     std::cout << "[TDD] Rodando testes unitários do protocolo C++ ESP32..." << std::endl;
 
@@ -134,6 +163,18 @@ int main() {
     assert(testCmd == "CTRL+C");
     std::cout << "  ✔ Teste 4: Limpeza de prefixos compostos passou." << std::endl;
 
-    std::cout << "\n[SUCESSO] Todos os 4 conjuntos de testes de firmware ESP32 passaram com 100% de sucesso!" << std::endl;
+    // Teste 5: Mouse absoluto (usado pelo app para clicar em texto/imagem da captura HDMI)
+    AbsParams a1;
+    assert(parseAbsParams("16383,8191", a1));
+    assert(a1.x == 16383 && a1.y == 8191 && a1.isHuman == false);
+    AbsParams a2;
+    assert(parseAbsParams("100,200,7", a2));
+    assert(a2.x == 100 && a2.y == 200 && a2.speed == 7 && a2.isHuman == true);
+    AbsParams a3;
+    assert(!parseAbsParams("123", a3));
+    assert(clampAbs(-5) == 0 && clampAbs(40000) == ABS_MOUSE_MAX && clampAbs(1000) == 1000);
+    std::cout << "  ✔ Teste 5: Parser do mouse absoluto (ABS:x,y[,velocidade]) passou." << std::endl;
+
+    std::cout << "\n[SUCESSO] Todos os 5 conjuntos de testes de firmware ESP32 passaram com 100% de sucesso!" << std::endl;
     return 0;
 }

@@ -11,8 +11,100 @@
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
+// --- MOUSE ABSOLUTO HID ---
+// Posiciona o cursor em coordenadas absolutas (0..32767 em cada eixo, mapeadas pelo SO
+// para a tela inteira), sem depender da aceleração do ponteiro. Usado pelo app para clicar
+// em textos/imagens encontrados na captura HDMI. Usa um report ID próprio para conviver
+// com o mouse relativo (USBHIDMouse), que continua atendendo MOVE:, MOUSE_LCLICK etc.
+#define HID_REPORT_ID_ABS_MOUSE 7
+#define ABS_MOUSE_MAX 32767
+
+// Mesmo formato do TUD_HID_REPORT_DESC_ABSMOUSE (hid_abs_mouse_report_t), mas a coleção de
+// aplicação é "Pointer" em vez de "Mouse". Com "Mouse", o Linux junta este dispositivo ao mouse
+// relativo num único nó de entrada e o libinput descarta os eixos absolutos. Com "Pointer" ele
+// vira um nó separado (ponteiro absoluto, como o tablet de VMs). O Windows aceita ambos.
+static const uint8_t absMouseReportDescriptor[] = {
+  HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),
+  HID_USAGE(HID_USAGE_DESKTOP_POINTER),
+  HID_COLLECTION(HID_COLLECTION_APPLICATION),
+    HID_REPORT_ID(HID_REPORT_ID_ABS_MOUSE)
+    HID_USAGE(HID_USAGE_DESKTOP_POINTER),
+    HID_COLLECTION(HID_COLLECTION_PHYSICAL),
+      HID_USAGE_PAGE(HID_USAGE_PAGE_BUTTON),
+        HID_USAGE_MIN(1),
+        HID_USAGE_MAX(5),
+        HID_LOGICAL_MIN(0),
+        HID_LOGICAL_MAX(1),
+        HID_REPORT_COUNT(5),
+        HID_REPORT_SIZE(1),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
+        HID_REPORT_COUNT(1),
+        HID_REPORT_SIZE(3),
+        HID_INPUT(HID_CONSTANT),
+      HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),
+        HID_USAGE(HID_USAGE_DESKTOP_X),
+        HID_USAGE(HID_USAGE_DESKTOP_Y),
+        HID_LOGICAL_MIN(0x00),
+        HID_LOGICAL_MAX_N(ABS_MOUSE_MAX, 2),
+        HID_REPORT_SIZE(16),
+        HID_REPORT_COUNT(2),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),
+        HID_USAGE(HID_USAGE_DESKTOP_WHEEL),
+        HID_LOGICAL_MIN(0x81),
+        HID_LOGICAL_MAX(0x7f),
+        HID_REPORT_COUNT(1),
+        HID_REPORT_SIZE(8),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_RELATIVE),
+      HID_USAGE_PAGE(HID_USAGE_PAGE_CONSUMER),
+        HID_USAGE_N(HID_USAGE_CONSUMER_AC_PAN, 2),
+        HID_LOGICAL_MIN(0x81),
+        HID_LOGICAL_MAX(0x7f),
+        HID_REPORT_COUNT(1),
+        HID_REPORT_SIZE(8),
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_RELATIVE),
+    HID_COLLECTION_END,
+  HID_COLLECTION_END
+};
+
+class AbsoluteMouse : public USBHIDDevice {
+public:
+  AbsoluteMouse() {
+    static bool added = false;
+    if (!added) {
+      added = true;
+      hid.addDevice(this, sizeof(absMouseReportDescriptor));
+    }
+  }
+
+  void begin() { hid.begin(); }
+
+  uint16_t _onGetDescriptor(uint8_t *buffer) override {
+    memcpy(buffer, absMouseReportDescriptor, sizeof(absMouseReportDescriptor));
+    return sizeof(absMouseReportDescriptor);
+  }
+
+  void moveTo(int x, int y) {
+    lastX = constrain(x, 0, ABS_MOUSE_MAX);
+    lastY = constrain(y, 0, ABS_MOUSE_MAX);
+    hid_abs_mouse_report_t report = {};
+    report.buttons = 0;
+    report.x = (int16_t)lastX;
+    report.y = (int16_t)lastY;
+    hid.SendReport(HID_REPORT_ID_ABS_MOUSE, &report, sizeof(report));
+  }
+
+  int x() const { return lastX; }
+  int y() const { return lastY; }
+
+private:
+  USBHID hid;
+  int lastX = 0;
+  int lastY = 0;
+};
+
 USBHIDKeyboard keyboard;
 USBHIDMouse Mouse;
+AbsoluteMouse AbsMouse;
 
 BLEServer *pServer = nullptr;
 BLECharacteristic *pTxCharacteristic = nullptr; // Tx Characteristic for sending data
@@ -224,6 +316,61 @@ void moveMouseTo(int targetX, int targetY, int speed = 5, bool isHuman = false) 
   }
 }
 
+// Move o cursor para uma posição absoluta (0..32767). Com isHuman, segue uma curva de
+// Bézier com ease-in-out a partir da última posição absoluta enviada.
+void moveMouseAbsolute(int targetX, int targetY, int speed = 5, bool isHuman = false) {
+  targetX = constrain(targetX, 0, ABS_MOUSE_MAX);
+  targetY = constrain(targetY, 0, ABS_MOUSE_MAX);
+
+  if (!isHuman) {
+    AbsMouse.moveTo(targetX, targetY);
+    return;
+  }
+
+  speed = constrain(speed, 1, 10);
+  int steps = map(speed, 1, 10, 120, 25);
+  int stepDelay = map(speed, 1, 10, 8, 2);
+
+  float x0 = (float)AbsMouse.x();
+  float y0 = (float)AbsMouse.y();
+  float dx = (float)targetX - x0;
+  float dy = (float)targetY - y0;
+  float p1X = x0 + dx * 0.5f - dy * 0.15f;
+  float p1Y = y0 + dy * 0.5f + dx * 0.15f;
+
+  for (int i = 1; i <= steps; i++) {
+    float u = (float)i / (float)steps;
+    float t = u * u * (3.0f - 2.0f * u);
+    float invT = 1.0f - t;
+    float currX = invT * invT * x0 + 2.0f * invT * t * p1X + t * t * (float)targetX;
+    float currY = invT * invT * y0 + 2.0f * invT * t * p1Y + t * t * (float)targetY;
+    if (i == steps) {
+      currX = targetX;
+      currY = targetY;
+    }
+    AbsMouse.moveTo((int)round(currX), (int)round(currY));
+    delay(stepDelay);
+  }
+}
+
+// Interpreta "x,y" ou "x,y,velocidade". Retorna false se faltar a vírgula entre x e y.
+bool parseAbsParams(String params, int &x, int &y, int &speed, bool &isHuman) {
+  params.trim();
+  int c1 = params.indexOf(',');
+  if (c1 == -1) return false;
+  x = params.substring(0, c1).toInt();
+  int c2 = params.indexOf(',', c1 + 1);
+  if (c2 == -1) {
+    y = params.substring(c1 + 1).toInt();
+    isHuman = false;
+  } else {
+    y = params.substring(c1 + 1, c2).toInt();
+    speed = params.substring(c2 + 1).toInt();
+    isHuman = true;
+  }
+  return true;
+}
+
 // Modo de Acentuação:
 // 0 = Teclas Mortas / Dead Keys (Recomendado para Linux Mint & Windows com ABNT2 / US-Intl)
 // 1 = Linux GTK Unicode (Ctrl+Shift+U + Hex + Enter -> Funciona no Linux Mint com QUALQUER teclado)
@@ -395,6 +542,13 @@ void processSingleCommand(String cmd) {
     keyboard.write(KEY_RETURN);
     delay(50);
     keyboard.releaseAll();
+  } else if (cmd.startsWith("ABS:")) {
+    // Mouse absoluto: ABS:x,y (salto direto) ou ABS:x,y,velocidade (movimento humanizado)
+    int x = 0, y = 0, speed = 5;
+    bool isHuman = false;
+    if (parseAbsParams(cmd.substring(4), x, y, speed, isHuman)) {
+      moveMouseAbsolute(x, y, speed, isHuman);
+    }
   } else if (cmd.startsWith("MOVE:") || cmd.startsWith("MOVE_HUMAN:") || cmd.startsWith("HUMAN_MOVE:") ||
              cmd.startsWith("MOVE_TO:") || cmd.startsWith("MOVE_ABS:") || cmd.startsWith("MOUSE_MOVE:") || cmd.startsWith("MOUSE:")) {
     bool isHuman = (cmd.startsWith("MOVE_HUMAN:") || cmd.startsWith("HUMAN_MOVE:"));
@@ -489,6 +643,7 @@ void setup() {
   USB.manufacturerName("HID Device");
   keyboard.begin();
   Mouse.begin();
+  AbsMouse.begin();
   USB.begin();
 
   BLEDevice::init("ESP32-S3-UART");
